@@ -27,9 +27,9 @@ namespace Notepad.Services
          */
         public int GetPages()
         {
-            string url = @"http://121.4.203.203:8090/api/admin/posts";
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.GET);
+            RestClient client = new RestClient(ConstantUtil.URL);
+            string uri = @"/api/admin/posts";
+            var request = new RestRequest(uri, Method.GET);
             request.AddParameter("admin_token", token);
             request.AddParameter("more", true);
             request.AddParameter("page", 0);
@@ -48,12 +48,12 @@ namespace Notepad.Services
         /*
          * 获取特定页的博客
          */
-        public List<PostInfo> GetPosts(int page)
+        public List<PostInfo> GetPostByPage(int page)
         {
+            RestClient client = new RestClient(ConstantUtil.URL);
             List<PostInfo> postsList = new List<PostInfo>();
-            string url = @"http://121.4.203.203:8090/api/admin/posts";
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.GET);
+            string uri = @"/api/admin/posts";
+            var request = new RestRequest(uri, Method.GET);
             request.AddParameter("admin_token", token);
             request.AddParameter("more", true);
             request.AddParameter("page", page - 1);
@@ -87,15 +87,28 @@ namespace Notepad.Services
         }
 
         /*
+         * 获取全部博客
+         */
+        public List<PostInfo> GetAllPost()
+        {
+            List<PostInfo> allPost = new List<PostInfo>();
+            int allPage = GetPages();
+            for (int i = 1; i <= allPage; i++)
+            {
+                allPost.AddRange(GetPostByPage(i));
+            }
+            return allPost;
+        }
+
+        /*
          * 获取特定博客详细内容
          */
         public Post GetPostById(int postId)
         {
             Post post = null;
-
-            string url = "http://121.4.203.203:8090/api/admin/posts/" + postId;
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.GET);
+            RestClient client = new RestClient(ConstantUtil.URL);
+            string uri = "/api/admin/posts/" + postId;
+            var request = new RestRequest(uri, Method.GET);
             request.AddParameter("admin_token", token);
             IRestResponse restResponse = client.Execute(request);
 
@@ -116,17 +129,15 @@ namespace Notepad.Services
          */
         public string AddNewPost(string title)
         {
+            RestClient client = new RestClient(ConstantUtil.URL);
             string cachePath = ConstantUtil.CACHEPATH + title;
             StreamReader sr = new StreamReader(cachePath);
             string originalContent = sr.ReadToEnd();
             sr.Close();
             Post newPost = new Post(title, originalContent);
             var jsonPost = JsonConvert.SerializeObject(newPost);
-
-            string url = @"http://121.4.203.203:8090";
-            // string url = @"http://121.4.203.203:8090/api/admin/categories";
-            var client = new RestClient(url);
-            var request = new RestRequest(@"/api/admin/posts", Method.POST);
+            string uri = @"/api/admin/posts";
+            var request = new RestRequest(uri, Method.POST);
             client.AddDefaultHeader("ADMIN-Authorization", token);
             request.AddJsonBody(jsonPost);
 
@@ -144,12 +155,13 @@ namespace Notepad.Services
          * 通过Id更新现有博客
          */
         public string UpdatePostById(int id, string path)
-        {   
-            var client = new RestClient(ConstantUtil.URL);
-            var request = new RestRequest(@"/api/admin/posts/" + id, Method.PUT);
+        {
+            RestClient client = new RestClient(ConstantUtil.URL);
+            string uri = @"/api/admin/posts/" + id;
+            var request = new RestRequest(uri, Method.PUT);
             client.AddDefaultHeader("ADMIN-Authorization", token);
-            // 创建更新参数
-            string title = GetPostById(id).title;
+            Post post = GetPostById(id);
+            string title = post.title;
             StreamReader readStream = new StreamReader(path);
             string originalContent = readStream.ReadToEnd();
             readStream.Close();

@@ -1,31 +1,26 @@
 ﻿using Newtonsoft.Json;
 using Notepad.Bean;
+using Notepad.Utils;
 using RestSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Notepad.Services
 {
     class AuthService
     {
         /**
-         * Login，返回用户token，使用Halo默认的过期时间86400
+         * Login，返回用户token，Halo默认的过期时间86400
          */
         public string Login()
         {
             string token;
-            string url = @"http://121.4.203.203:8090/api/admin/login";
-            // string contentData = "{'username': 'caozihao107@163.com' ,'password' : 'xiaoyuaidahai'}";
-            User user = new User("caozihao107@163.com", "xiaoyuaidahai");
+            string uri = @"/api/admin/login";
+            User user = new User(ConstantUtil.USERNAME, ConstantUtil.PASSWORD);
             var contentData = JsonConvert.SerializeObject(user);
 
-            var client = new RestClient(url);
-            var request = new RestRequest(Method.POST);
+            var client = new RestClient(ConstantUtil.URL);
+            var request = new RestRequest(uri, Method.POST);
             request.AddJsonBody(contentData);
 
             IRestResponse restResponse = client.Execute(request);

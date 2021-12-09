@@ -29,34 +29,43 @@ namespace NotePad
         /// </summary>
         private void InitializeComponent()
         {
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.ucDataGridView1 = new HZH_Controls.Controls.UCDataGridView();
             this.SuspendLayout();
             // 
-            // listView1
+            // ucDataGridView1
             // 
-            this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(12, 12);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(178, 314);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.ucDataGridView1.BackColor = System.Drawing.Color.White;
+            this.ucDataGridView1.Columns = null;
+            this.ucDataGridView1.DataSource = null;
+            this.ucDataGridView1.HeadFont = new System.Drawing.Font("微软雅黑", 12F);
+            this.ucDataGridView1.HeadHeight = 40;
+            this.ucDataGridView1.HeadPadingLeft = 0;
+            this.ucDataGridView1.HeadTextColor = System.Drawing.Color.Black;
+            this.ucDataGridView1.IsShowCheckBox = false;
+            this.ucDataGridView1.IsShowHead = true;
+            this.ucDataGridView1.Location = new System.Drawing.Point(1, 2);
+            this.ucDataGridView1.Name = "ucDataGridView1";
+            this.ucDataGridView1.Padding = new System.Windows.Forms.Padding(0, 40, 0, 0);
+            this.ucDataGridView1.RowHeight = 40;
+            this.ucDataGridView1.RowType = typeof(HZH_Controls.Controls.UCDataGridViewRow);
+            this.ucDataGridView1.Size = new System.Drawing.Size(680, 365);
+            this.ucDataGridView1.TabIndex = 0;
             // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(202, 338);
-            this.Controls.Add(this.listView1);
+            this.ClientSize = new System.Drawing.Size(684, 379);
+            this.Controls.Add(this.ucDataGridView1);
             this.Name = "Form3";
             this.Text = "Form3";
-            this.Load += new System.EventHandler(this.Form3_Load);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.ListView listView1;
+        private HZH_Controls.Controls.UCDataGridView ucDataGridView1;
     }
 }
 

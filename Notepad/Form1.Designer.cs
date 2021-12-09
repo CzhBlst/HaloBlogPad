@@ -64,8 +64,11 @@
             this.addBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.choseBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.menuStrip1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBox1
@@ -74,11 +77,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(12, 61);
+            this.textBox1.Location = new System.Drawing.Point(3, 3);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(1106, 520);
+            this.textBox1.Size = new System.Drawing.Size(576, 574);
             this.textBox1.TabIndex = 0;
             this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
@@ -110,7 +113,6 @@
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(39, 21);
             this.fileToolStripMenuItem.Text = "&File";
-            this.fileToolStripMenuItem.Click += new System.EventHandler(this.fileToolStripMenuItem_Click);
             // 
             // newToolStripMenuItem
             // 
@@ -299,9 +301,9 @@
             this.labelFormat.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.labelFormat.Location = new System.Drawing.Point(0, 599);
             this.labelFormat.Name = "labelFormat";
-            this.labelFormat.Size = new System.Drawing.Size(77, 12);
+            this.labelFormat.Size = new System.Drawing.Size(83, 12);
             this.labelFormat.TabIndex = 2;
-            this.labelFormat.Text = "No file fond";
+            this.labelFormat.Text = "No Blog Chose";
             this.labelFormat.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // menuStrip2
@@ -354,25 +356,45 @@
             this.editBlogToolStripMenuItem.Text = "EditBlog";
             this.editBlogToolStripMenuItem.Click += new System.EventHandler(this.editPostToolStripMenuItem_Click);
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.webBrowser1);
+            this.panel1.Controls.Add(this.textBox1);
+            this.panel1.Location = new System.Drawing.Point(2, 53);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1128, 577);
+            this.panel1.TabIndex = 5;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Location = new System.Drawing.Point(585, 0);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(531, 558);
+            this.webBrowser1.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1130, 611);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip2);
             this.Controls.Add(this.labelFormat);
-            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Notepad";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load_1);
+            this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -416,6 +438,8 @@
         private System.Windows.Forms.ToolStripMenuItem addBlogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editBlogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem choseBlogToolStripMenuItem;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.WebBrowser webBrowser1;
     }
 }
 

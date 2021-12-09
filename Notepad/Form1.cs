@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using HeyRed.MarkdownSharp;
 using Notepad.Services;
 using Notepad.Utils;
 using NotePad;
@@ -20,24 +21,11 @@ namespace Notepad
         String path = String.Empty;
         String token;
         Boolean isLogin = false;
+        Boolean preViewMD = false;
         PostService postServices;
+        
 
         public Form1() => InitializeComponent();
-
-        public void OnHotkey(int HotkeyID) //alt+z隐藏窗体，再按显示窗体。
-        {
-            if (HotkeyID == Hotkey.Hotkey1)
-            {
-                if (this.Visible == true)
-                    this.Visible = false;
-                else
-                    this.Visible = true;
-            }
-            else
-            {
-                this.Visible = false;
-            }
-        }
 
         private string ReturnMessageFromFormat(string type)
         {
@@ -105,18 +93,6 @@ namespace Notepad
             postsForm.ShowDialog();
         }
 
-        /*private void getPostByIdToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (isLogin)
-            {
-                postServices.GetPostById(551);
-            }
-            else
-            {
-                MessageBox.Show("未登录！");
-            }
-        }*/
-
         private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form addPostForm = new Form4(token);
@@ -127,6 +103,7 @@ namespace Notepad
         {
             Form addPostForm = new Form5(token);
             addPostForm.ShowDialog();
+            labelFormat.Text = PostChoseHelper.TITLE;
         }
 
         private void editPostToolStripMenuItem_Click(object sender, EventArgs e)
@@ -142,6 +119,7 @@ namespace Notepad
                 string originalContent = File.ReadAllText(path);
                 originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
                 textBox1.Text = originalContent;
+                labelFormat.Text = title;
             }
         }
 
@@ -328,17 +306,86 @@ namespace Notepad
             this.BackColor = Color.White;
         }
 
-        private void fileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
+        /*
+         * 窗口加载时注册热键，并更改各个组件
+         */
+        private void Form1_Load_1(object sender, EventArgs e)
+        {   
+            HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);  
+            HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
+            ChangePannel();
         }
 
-        private void Form1_Load_1(object sender, EventArgs e)
+        private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            Hotkey hotkey;
-            hotkey = new Hotkey(this.Handle);
-            Hotkey.Hotkey1 = hotkey.RegisterHotkey(System.Windows.Forms.Keys.Q, Hotkey.KeyFlags.MOD_ALT);   //定义快键(alt+z)
-            hotkey.OnHotkey += new HotkeyEventHandler(OnHotkey);
+            ChangePannel();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_HOTKEY = 0x0312;
+            //按快捷键    
+            switch (m.Msg)
+            {
+                case WM_HOTKEY:
+                    switch (m.WParam.ToInt32())
+                    {
+                        case 100:    //隐藏窗口
+                            HideForm();
+                            break;
+                        case 101:   //切换MD和文本
+                            if (preViewMD)
+                                preViewMD = false;
+                            else
+                                preViewMD = true;
+                            ChangePannel();
+                            break;
+                        case 102:    //按下的是Alt+D   
+                            //此处填写快捷键响应代码   
+                            this.Text = "按下的是Ctrl+Alt+D";
+                            break;
+                        case 103:
+                            this.Text = "F5";
+                            break;
+                    }
+                    break;
+            }
+            base.WndProc(ref m);
+        }
+        public void HideForm() //alt+q隐藏窗体，再按显示窗体。
+        {
+            if (this.Visible == true)
+                this.Visible = false;
+            else
+                this.Visible = true;
+        }
+        // alt+V 切换文本和MarkDown预览模式
+        private void ChangePannel()
+        {
+            if (preViewMD)
+            {
+                textBox1.Hide();
+                webBrowser1.Show();
+                string originalContent = textBox1.Text;
+                Markdown md = new Markdown();
+                string mdContent = md.Transform(originalContent);
+                webBrowser1.DocumentText = mdContent;
+                webBrowser1.Left = 5;
+                webBrowser1.Width = this.Width - 30;
+                webBrowser1.Top = 5;
+                webBrowser1.Height = this.Height - 100;
+            }
+            else
+            {
+                webBrowser1.Hide();
+                textBox1.Show();
+                textBox1.Focus();
+                textBox1.Left = 5;
+                textBox1.Width = this.Width - 30;
+
+                textBox1.Top = 5;
+                textBox1.Height = this.Height - 100;
+            }
         }
     }
 }
