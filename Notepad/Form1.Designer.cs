@@ -54,6 +54,7 @@
             this.blackToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.defaultToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
@@ -63,7 +64,6 @@
             this.getBlogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.choseBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.menuStrip1.SuspendLayout();
@@ -93,7 +93,8 @@
             this.editToolStripMenuItem,
             this.formatToolStripMenuItem,
             this.helpToolStripMenuItem,
-            this.themeToolStripMenuItem});
+            this.themeToolStripMenuItem,
+            this.settingsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1130, 25);
@@ -283,6 +284,13 @@
             this.defaultToolStripMenuItem.Text = "Default";
             this.defaultToolStripMenuItem.Click += new System.EventHandler(this.defaultToolStripMenuItem_Click);
             // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(66, 21);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            // 
             // saveFileDialog1
             // 
             this.saveFileDialog1.CheckPathExists = false;
@@ -313,8 +321,7 @@
             this.loginToolStripMenuItem,
             this.getBlogsToolStripMenuItem,
             this.addBlogToolStripMenuItem,
-            this.choseBlogToolStripMenuItem,
-            this.editBlogToolStripMenuItem});
+            this.choseBlogToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 25);
             this.menuStrip2.Name = "menuStrip2";
             this.menuStrip2.Size = new System.Drawing.Size(1130, 25);
@@ -348,13 +355,6 @@
             this.choseBlogToolStripMenuItem.Size = new System.Drawing.Size(83, 21);
             this.choseBlogToolStripMenuItem.Text = "ChoseBlog";
             this.choseBlogToolStripMenuItem.Click += new System.EventHandler(this.chosePostToolStripMenuItem_Click);
-            // 
-            // editBlogToolStripMenuItem
-            // 
-            this.editBlogToolStripMenuItem.Name = "editBlogToolStripMenuItem";
-            this.editBlogToolStripMenuItem.Size = new System.Drawing.Size(69, 21);
-            this.editBlogToolStripMenuItem.Text = "EditBlog";
-            this.editBlogToolStripMenuItem.Click += new System.EventHandler(this.editPostToolStripMenuItem_Click);
             // 
             // panel1
             // 
@@ -436,10 +436,10 @@
         private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getBlogsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addBlogToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem editBlogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem choseBlogToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
     }
 }
 

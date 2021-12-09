@@ -10,6 +10,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HeyRed.MarkdownSharp;
+using HZH_Controls.Forms;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Notepad.Bean;
 using Notepad.Services;
 using Notepad.Utils;
 using NotePad;
@@ -20,6 +24,7 @@ namespace Notepad
     {
         String path = String.Empty;
         String token;
+        int currentPost;
         Boolean isLogin = false;
         Boolean preViewMD = false;
         PostService postServices;
@@ -103,11 +108,8 @@ namespace Notepad
         {
             Form addPostForm = new Form5(token);
             addPostForm.ShowDialog();
-            labelFormat.Text = PostChoseHelper.TITLE;
-        }
-
-        private void editPostToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+            this.Text = "BlogPad" + " - " + PostChoseHelper.TITLE;
+            currentPost = PostChoseHelper.POSTID;
             if (PostChoseHelper.POSTID == -1)
             {
                 MessageBox.Show("请先选择一个博客");
@@ -119,7 +121,6 @@ namespace Notepad
                 string originalContent = File.ReadAllText(path);
                 originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
                 textBox1.Text = originalContent;
-                labelFormat.Text = title;
             }
         }
 
@@ -146,7 +147,7 @@ namespace Notepad
             if (!String.IsNullOrWhiteSpace(path))
             {
                 File.WriteAllText(path, textBox1.Text);
-                postServices.UpdatePostById(PostChoseHelper.POSTID, path);
+                MessageBox.Show(postServices.UpdatePostById(PostChoseHelper.POSTID, path));
             }
             else
             {
@@ -314,6 +315,7 @@ namespace Notepad
             HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);  
             HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
             ChangePannel();
+            LoadSettings(ReadSettings());
         }
 
         private void Form1_SizeChanged(object sender, EventArgs e)
@@ -386,6 +388,67 @@ namespace Notepad
                 textBox1.Top = 5;
                 textBox1.Height = this.Height - 100;
             }
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Setting setting = ReadSettings();
+            FrmInputs frm = new FrmInputs("博客设置",
+                new string[] { "博客地址", "缓存路径", "账号(邮箱)", "密码" },
+                defaultValues: new Dictionary<string, string> { { "博客地址", setting.Url },
+                    { "缓存路径", setting.CachePath },
+                    { "账号(邮箱)", setting.Username },
+                    { "密码", setting.Password } }
+                );
+            frm.ShowDialog(this);
+            string[] test = frm.Values;
+            setting.Url = test[0];
+            setting.CachePath = test[1];
+            setting.Username = test[2];
+            setting.Password = test[3];
+            WriteSettings(setting);
+            LoadSettings(setting);
+        }
+
+        private Setting ReadSettings()
+        {
+            PostChoseHelper.POSTID = -1; // 重置博客，防止将settings提交到博客
+            string settingsFile = "./settings.json";
+            StreamReader sr = new StreamReader(settingsFile);
+            string settingsText = sr.ReadToEnd();
+            sr.Close();
+            this.path = settingsFile;
+            JObject jo = (JObject)JsonConvert.DeserializeObject(settingsText);
+            Setting settings = new Setting();
+            settings.Url = jo["Url"].ToString();
+            settings.CachePath = jo["CachePath"].ToString();
+            settings.Username = jo["Username"].ToString();
+            settings.Password = jo["Password"].ToString();
+            if (settings.Url == "" ||
+                settings.CachePath == "" ||
+                settings.Username == "" ||
+                settings.Password == "")
+            {
+                MessageBox.Show("请修改配置文件");
+            }
+            return settings;
+        }
+
+        private void WriteSettings(Setting setting)
+        {
+            string settingsFile = "./settings.json";
+            string settingsContent = JsonConvert.SerializeObject(setting);
+            StreamWriter sr = new StreamWriter(settingsFile, append: false);
+            sr.Write(settingsContent);
+            sr.Close();
+        }
+
+        private void LoadSettings(Setting setting)
+        {
+            ConstantUtil.CACHEPATH = setting.CachePath;
+            ConstantUtil.URL = setting.Url;
+            ConstantUtil.USERNAME = setting.Username;
+            ConstantUtil.PASSWORD = setting.Password;
         }
     }
 }
