@@ -264,6 +264,7 @@ namespace Notepad
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
+
             if (e.Control)
             {
 
@@ -280,11 +281,6 @@ namespace Notepad
                     case Keys.S:
                         e.SuppressKeyPress = true;
                         saveToolStripMenuItem_Click(sender, e);
-                        break;
-                    case Keys.T:
-                        var pos = textBox1.SelectionStart;
-                        textBox1.Text = textBox1.Text.Insert(pos, "\t");
-                        this.textBox1.SelectionStart = pos + "\t".Length;
                         break;
                     case Keys.Q:
                         if (this.TopMost == true)
@@ -323,7 +319,7 @@ namespace Notepad
         }
 
         /*
-         * 窗口加载时注册热键，并更改各个组件
+         * 窗口加载时注册热键，并更改各个组件位置
          */
         private void Form1_Load_1(object sender, EventArgs e)
         {   
@@ -369,6 +365,7 @@ namespace Notepad
             }
             base.WndProc(ref m);
         }
+
         public void HideForm() //alt+q隐藏窗体，再按显示窗体。
         {
             if (this.Visible == true)
