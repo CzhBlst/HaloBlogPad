@@ -421,6 +421,13 @@ namespace Notepad
             setting.CachePath = test[1];
             setting.Username = test[2];
             setting.Password = test[3];
+            if (setting.Url == null ||
+                setting.CachePath == null ||
+                setting.Username == null ||
+                setting.Password == null)
+            {
+                return;
+            }
             WriteSettings(setting);
             LoadSettings(setting);
         }
