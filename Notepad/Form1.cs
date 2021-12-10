@@ -96,32 +96,47 @@ namespace Notepad
         {
             Form postsForm = new Form3(token);
             postsForm.ShowDialog();
-        }
-
-        private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Form addPostForm = new Form4(token);
-            addPostForm.ShowDialog();
-        }
-
-        private void chosePostToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Form addPostForm = new Form5(token);
-            addPostForm.ShowDialog();
-            this.Text = "BlogPad" + " - " + PostChoseHelper.TITLE;
-            currentPost = PostChoseHelper.POSTID;
-            if (PostChoseHelper.POSTID == -1)
-            {
-                MessageBox.Show("请先选择一个博客");
-            }
-            else
+            if (!PostChoseHelper.TITLE.Equals(""))
             {
                 string title = PostChoseHelper.TITLE;
                 this.path = PostChoseHelper.FILEPATH;
                 string originalContent = File.ReadAllText(path);
                 originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
                 textBox1.Text = originalContent;
+                this.Text = "AutoBlog" + " - " + title;
             }
+            else
+            {
+                MessageBox.Show("未选择Blog");
+            }
+        }
+
+        private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmInputs frm = new FrmInputs("新建博客",
+                new string[] { "Title", "内容", "密码" },
+                mastInputs: new List<string>() { "Title" });
+            frm.ShowDialog(this);
+            string[] test = frm.Values;
+            if (test[0] == null)
+            {
+                return;
+            }
+            Post post = new Post(test[0], test[1]);
+            string cachePath = ConstantUtil.CACHEPATH + post.title;
+            FileStream fs = new FileStream(cachePath, FileMode.OpenOrCreate, FileAccess.Read);
+            fs.Close();
+            PostChoseHelper.FILEPATH = cachePath;
+            PostChoseHelper.TITLE = post.title;
+
+            postServices.AddNewPost(post.title);
+            MessageBox.Show("新建博客: " + PostChoseHelper.TITLE + "\n缓存路径为: " + PostChoseHelper.FILEPATH);
+
+            this.path = PostChoseHelper.FILEPATH;
+            string originalContent = File.ReadAllText(path);
+            originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
+            textBox1.Text = originalContent;
+            this.Text = "AutoBlog" + " - " + PostChoseHelper.TITLE;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)

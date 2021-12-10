@@ -63,7 +63,6 @@
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getBlogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.choseBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.menuStrip1.SuspendLayout();
@@ -320,8 +319,7 @@
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loginToolStripMenuItem,
             this.getBlogsToolStripMenuItem,
-            this.addBlogToolStripMenuItem,
-            this.choseBlogToolStripMenuItem});
+            this.addBlogToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 25);
             this.menuStrip2.Name = "menuStrip2";
             this.menuStrip2.Size = new System.Drawing.Size(1130, 25);
@@ -348,13 +346,6 @@
             this.addBlogToolStripMenuItem.Size = new System.Drawing.Size(71, 21);
             this.addBlogToolStripMenuItem.Text = "AddBlog";
             this.addBlogToolStripMenuItem.Click += new System.EventHandler(this.addNewPostToolStripMenuItem_Click);
-            // 
-            // choseBlogToolStripMenuItem
-            // 
-            this.choseBlogToolStripMenuItem.Name = "choseBlogToolStripMenuItem";
-            this.choseBlogToolStripMenuItem.Size = new System.Drawing.Size(83, 21);
-            this.choseBlogToolStripMenuItem.Text = "ChoseBlog";
-            this.choseBlogToolStripMenuItem.Click += new System.EventHandler(this.chosePostToolStripMenuItem_Click);
             // 
             // panel1
             // 
@@ -436,7 +427,6 @@
         private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getBlogsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addBlogToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem choseBlogToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;

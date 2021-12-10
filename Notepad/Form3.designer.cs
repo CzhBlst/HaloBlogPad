@@ -30,6 +30,7 @@ namespace NotePad
         private void InitializeComponent()
         {
             this.ucDataGridView1 = new HZH_Controls.Controls.UCDataGridView();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // ucDataGridView1
@@ -48,14 +49,25 @@ namespace NotePad
             this.ucDataGridView1.Padding = new System.Windows.Forms.Padding(0, 40, 0, 0);
             this.ucDataGridView1.RowHeight = 40;
             this.ucDataGridView1.RowType = typeof(HZH_Controls.Controls.UCDataGridViewRow);
-            this.ucDataGridView1.Size = new System.Drawing.Size(680, 365);
+            this.ucDataGridView1.Size = new System.Drawing.Size(681, 349);
             this.ucDataGridView1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(301, 357);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Edit";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(684, 379);
+            this.ClientSize = new System.Drawing.Size(684, 382);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.ucDataGridView1);
             this.Name = "Form3";
             this.Text = "Form3";
@@ -66,6 +78,7 @@ namespace NotePad
         #endregion
 
         private HZH_Controls.Controls.UCDataGridView ucDataGridView1;
+        private System.Windows.Forms.Button button1;
     }
 }
 
