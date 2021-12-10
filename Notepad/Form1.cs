@@ -98,17 +98,23 @@ namespace Notepad
             postsForm.ShowDialog();
             if (!PostChoseHelper.TITLE.Equals(""))
             {
-                string title = PostChoseHelper.TITLE;
-                this.path = PostChoseHelper.FILEPATH;
-                string originalContent = File.ReadAllText(path);
-                originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
-                textBox1.Text = originalContent;
-                this.Text = "AutoBlog" + " - " + title;
+                setTextBox();
             }
             else
             {
                 MessageBox.Show("未选择Blog");
             }
+        }
+
+        private void setTextBox()
+        {
+            currentPost = PostChoseHelper.POSTID;
+            string title = PostChoseHelper.TITLE;
+            this.path = PostChoseHelper.FILEPATH;
+            string originalContent = File.ReadAllText(path);
+            originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
+            textBox1.Text = originalContent;
+            this.Text = "AutoBlog" + " - " + title;
         }
 
         private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
@@ -132,11 +138,7 @@ namespace Notepad
             postServices.AddNewPost(post.title);
             MessageBox.Show("新建博客: " + PostChoseHelper.TITLE + "\n缓存路径为: " + PostChoseHelper.FILEPATH);
 
-            this.path = PostChoseHelper.FILEPATH;
-            string originalContent = File.ReadAllText(path);
-            originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
-            textBox1.Text = originalContent;
-            this.Text = "AutoBlog" + " - " + PostChoseHelper.TITLE;
+            setTextBox();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -162,7 +164,10 @@ namespace Notepad
             if (!String.IsNullOrWhiteSpace(path))
             {
                 File.WriteAllText(path, textBox1.Text);
-                MessageBox.Show(postServices.UpdatePostById(PostChoseHelper.POSTID, path));
+                if (PostChoseHelper.POSTID >= 0)
+                {
+                    MessageBox.Show(postServices.UpdatePostById(PostChoseHelper.POSTID, path));
+                }
             }
             else
             {
@@ -427,6 +432,8 @@ namespace Notepad
             }
             WriteSettings(setting);
             LoadSettings(setting);
+            PostChoseHelper.POSTID = currentPost;
+            this.path = PostChoseHelper.FILEPATH;
         }
 
         private Setting ReadSettings()
@@ -436,7 +443,7 @@ namespace Notepad
             StreamReader sr = new StreamReader(settingsFile);
             string settingsText = sr.ReadToEnd();
             sr.Close();
-            this.path = settingsFile;
+            // this.path = settingsFile;
             JObject jo = (JObject)JsonConvert.DeserializeObject(settingsText);
             Setting settings = new Setting();
             settings.Url = jo["Url"].ToString();
@@ -456,6 +463,7 @@ namespace Notepad
         private void WriteSettings(Setting setting)
         {
             string settingsFile = "./settings.json";
+            this.path = settingsFile;
             string settingsContent = JsonConvert.SerializeObject(setting);
             StreamWriter sr = new StreamWriter(settingsFile, append: false);
             sr.Write(settingsContent);
