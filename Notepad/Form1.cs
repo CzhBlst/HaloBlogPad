@@ -98,6 +98,8 @@ namespace Notepad
             postsForm.ShowDialog();
             if (!PostChoseHelper.TITLE.Equals(""))
             {
+                Post post = postServices.GetPostById(PostChoseHelper.POSTID); // 获取所选博客详细信息
+                PostUtil.WriteToCache(post); // 将博客内容读取到本地
                 setTextBox();
             }
             else
