@@ -126,8 +126,9 @@ namespace Notepad.Services
 
         /*
          * 添加新的博客
+         * 返回值为新博客ID
          */
-        public string AddNewPost(string title)
+        public int AddNewPost(string title)
         {
             RestClient client = new RestClient(ConstantUtil.URL);
             string cachePath = ConstantUtil.CACHEPATH + title;
@@ -144,11 +145,14 @@ namespace Notepad.Services
             IRestResponse restResponse = client.Execute(request);
 
             string statusCode = restResponse.StatusCode.ToString();
+            int id = -1;
             if (restResponse.IsSuccessful)
             {
-                return "success";
+                var json = restResponse.Content;
+                JObject jo = (JObject)JsonConvert.DeserializeObject(json);
+                id = int.Parse(jo["data"]["id"].ToString());
             }
-            return "error";
+            return id;
         }
 
         /**

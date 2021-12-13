@@ -101,6 +101,7 @@ namespace Notepad
                 Post post = postServices.GetPostById(PostChoseHelper.POSTID); // 获取所选博客详细信息
                 PostUtil.WriteToCache(post); // 将博客内容读取到本地
                 setTextBox();
+               
             }
             else
             {
@@ -111,12 +112,18 @@ namespace Notepad
         private void setTextBox()
         {
             currentPost = PostChoseHelper.POSTID;
-            string title = PostChoseHelper.TITLE;
             this.path = PostChoseHelper.FILEPATH;
             string originalContent = File.ReadAllText(path);
             originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
             textBox1.Text = originalContent;
-            this.Text = "AutoBlog" + " - " + title;
+            this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE;
+        }
+
+        private void setChosePost(int postid, string title,string filepath)
+        {
+            PostChoseHelper.POSTID = postid;
+            PostChoseHelper.TITLE = title;
+            PostChoseHelper.FILEPATH = filepath;
         }
 
         private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
@@ -134,13 +141,16 @@ namespace Notepad
             string cachePath = ConstantUtil.CACHEPATH + post.title;
             FileStream fs = new FileStream(cachePath, FileMode.OpenOrCreate, FileAccess.Read);
             fs.Close();
-            PostChoseHelper.FILEPATH = cachePath;
-            PostChoseHelper.TITLE = post.title;
-
-            postServices.AddNewPost(post.title);
-            MessageBox.Show("新建博客: " + PostChoseHelper.TITLE + "\n缓存路径为: " + PostChoseHelper.FILEPATH);
-
+            int postId = postServices.AddNewPost(post.title);
+            if (postId == -1)
+            {
+                MessageBox.Show("新建博客失败");
+            }
+            setChosePost(postId, post.title, cachePath); // 设置当前Post信息
+            MessageBox.Show("新建博客: " + PostChoseHelper.POSTID + ":" + PostChoseHelper.TITLE + 
+                "\n缓存路径为: " + PostChoseHelper.FILEPATH);
             setTextBox();
+
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
