@@ -4,12 +4,6 @@ using Notepad.Services;
 using Notepad.Utils;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace NotePad
@@ -26,7 +20,7 @@ namespace NotePad
             lstCulumns.Add(new DataGridViewColumnEntity() { DataField = "Id", HeadText = "编号", Width = 70, WidthType = SizeType.Absolute });
             lstCulumns.Add(new DataGridViewColumnEntity() { DataField = "Title", HeadText = "博客", Width = 80, WidthType = SizeType.Percent });
             this.ucDataGridView1.Columns = lstCulumns;
-
+            this.ucDataGridView1.IsShowCheckBox = true;
             foreach (var post in posts)
             {
                 dataSource.Add(post);
@@ -34,6 +28,7 @@ namespace NotePad
             UCPagerControl page = new UCPagerControl();
             page.DataSource = dataSource;
             this.ucDataGridView1.DataSource = dataSource;
+
             // this.ucDataGridView1.First();
 
         }

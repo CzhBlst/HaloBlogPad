@@ -9,10 +9,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CommonMark;
 using HeyRed.MarkdownSharp;
 using HZH_Controls.Forms;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NLog.Extensions.Logging;
 using Notepad.Bean;
 using Notepad.Services;
 using Notepad.Utils;
@@ -101,7 +105,6 @@ namespace Notepad
                 Post post = postServices.GetPostById(PostChoseHelper.POSTID); // 获取所选博客详细信息
                 PostUtil.WriteToCache(post); // 将博客内容读取到本地
                 setTextBox();
-               
             }
             else
             {
@@ -398,8 +401,9 @@ namespace Notepad
                 textBox1.Hide();
                 webBrowser1.Show();
                 string originalContent = textBox1.Text;
-                Markdown md = new Markdown();
-                string mdContent = md.Transform(originalContent);
+                // Markdown md = new Markdown();
+                // string mdContent = md.Transform(originalContent);
+                string mdContent = CommonMarkConverter.Convert(originalContent);
                 webBrowser1.DocumentText = mdContent;
                 webBrowser1.Left = 5;
                 webBrowser1.Width = this.Width - 30;
@@ -488,6 +492,20 @@ namespace Notepad
             ConstantUtil.URL = setting.Url;
             ConstantUtil.USERNAME = setting.Username;
             ConstantUtil.PASSWORD = setting.Password;
+        }
+
+        private void testLog()
+        {
+            ServiceCollection services = new ServiceCollection();
+
+            services.AddLogging(logBuilder => {
+                logBuilder.AddNLog();
+            });
+            services.AddScoped<LogHelper>();
+            using (var sp = services.BuildServiceProvider()) {
+                LogHelper logger = sp.GetRequiredService<LogHelper>();
+                logger.Test();
+            }
         }
     }
 }
