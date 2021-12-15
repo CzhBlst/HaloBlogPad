@@ -65,6 +65,7 @@
             this.addBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.initEditPostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -320,7 +321,8 @@
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loginToolStripMenuItem,
             this.getBlogsToolStripMenuItem,
-            this.addBlogToolStripMenuItem});
+            this.addBlogToolStripMenuItem,
+            this.initEditPostToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 25);
             this.menuStrip2.Name = "menuStrip2";
             this.menuStrip2.Size = new System.Drawing.Size(1130, 25);
@@ -364,6 +366,13 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(531, 558);
             this.webBrowser1.TabIndex = 1;
+            // 
+            // initEditPostToolStripMenuItem
+            // 
+            this.initEditPostToolStripMenuItem.Name = "initEditPostToolStripMenuItem";
+            this.initEditPostToolStripMenuItem.Size = new System.Drawing.Size(106, 21);
+            this.initEditPostToolStripMenuItem.Text = "InitEditPosition";
+            this.initEditPostToolStripMenuItem.Click += new System.EventHandler(this.initEditPostToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -431,6 +440,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem initEditPostToolStripMenuItem;
     }
 }
 

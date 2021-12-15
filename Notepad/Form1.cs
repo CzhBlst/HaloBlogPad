@@ -120,6 +120,9 @@ namespace Notepad
             originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
             textBox1.Text = originalContent;
             this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE;
+            this.textBox1.SelectionStart = ReadPostEditPosById(PostChoseHelper.POSTID);
+            this.textBox1.Focus();
+            this.textBox1.ScrollToCaret();
         }
 
         private void setChosePost(int postid, string title,string filepath)
@@ -182,6 +185,7 @@ namespace Notepad
                 if (PostChoseHelper.POSTID >= 0)
                 {
                     MessageBox.Show(postServices.UpdatePostById(PostChoseHelper.POSTID, path));
+                    WritePostEditPosById();
                 }
             }
             else
@@ -494,6 +498,75 @@ namespace Notepad
             ConstantUtil.PASSWORD = setting.Password;
         }
 
+        /*
+         * 初始化所有博客的编辑位置
+         */
+        private void InitAllPost()
+        {
+            List<PostInfo> posts = postServices.GetAllPost();
+            List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
+            foreach (PostInfo post in posts)
+            {
+                postEditInfo.Add(new PostEditInfo(post.Id, 0));
+            }
+            string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
+            string tmpPath = @"D:\Notepad\BlogPad\temp\PostEditInfo.json";
+            FileStream fs = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.Read);
+            fs.Close();
+            StreamWriter sw = new StreamWriter(tmpPath);
+            sw.Write(jsonPosts);
+            sw.Flush();
+            sw.Close();
+        }
+
+        /*
+         * 通过ID更新
+         */
+        private void WritePostEditPosById()
+        {
+            Dictionary<int, int> oldInfo = ReadPostEditInfo();
+            oldInfo[PostChoseHelper.POSTID] = this.textBox1.SelectionStart;
+
+            List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
+            foreach (var post in oldInfo)
+            {
+                postEditInfo.Add(new PostEditInfo(post.Key, post.Value));
+            }
+            string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
+            string tmpPath = @"D:\Notepad\BlogPad\temp\PostEditInfo.json";
+
+            StreamWriter sw = new StreamWriter(tmpPath, false);
+            sw.Write(jsonPosts);
+            sw.Flush();
+            sw.Close();
+        }
+
+        /*
+         * 读取所有博客编辑位置
+         */
+        private Dictionary<int, int> ReadPostEditInfo()
+        {
+            StreamReader sr = new StreamReader(@"D:\Notepad\BlogPad\temp\PostEditInfo.json");
+            string jsoninfo = sr.ReadToEnd();
+            sr.Close();
+            JArray jo = (JArray)JsonConvert.DeserializeObject(jsoninfo);
+            Dictionary<int, int> postEditInfos = new Dictionary<int, int>();
+            foreach (var postEditInfo in jo)
+            {
+                postEditInfos.Add(int.Parse(postEditInfo["Id"].ToString()), 
+                    int.Parse(postEditInfo["LastEditPos"].ToString()));
+            }
+            return postEditInfos;
+        }
+
+        /*
+         */
+        private int ReadPostEditPosById(int id)
+        {
+            var posts = ReadPostEditInfo();
+            return posts[id];
+        }
+
         private void testLog()
         {
             ServiceCollection services = new ServiceCollection();
@@ -506,6 +579,12 @@ namespace Notepad
                 LogHelper logger = sp.GetRequiredService<LogHelper>();
                 logger.Test();
             }
+        }
+
+        private void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InitAllPost();
+            ReadPostEditInfo();
         }
     }
 }

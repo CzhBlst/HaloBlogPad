@@ -173,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bean\Post.cs" />
+    <Compile Include="Bean\PostEditInfo.cs" />
     <Compile Include="Bean\PostInfo.cs" />
     <Compile Include="Bean\Setting.cs" />
     <Compile Include="Bean\User.cs" />
