@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using CommonMark;
-using HeyRed.MarkdownSharp;
+﻿using CommonMark;
 using HZH_Controls.Forms;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog.Extensions.Logging;
@@ -21,6 +8,12 @@ using Notepad.Bean;
 using Notepad.Services;
 using Notepad.Utils;
 using NotePad;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace Notepad
 {
@@ -31,8 +24,10 @@ namespace Notepad
         int currentPost;
         Boolean isLogin = false;
         Boolean preViewMD = false;
+        String mdContent = "";
         PostService postServices;
-        
+        // id, title, content
+        Dictionary<String, KeyValuePair<String, String>> editPosts;
 
         public Form1() => InitializeComponent();
 
@@ -42,40 +37,28 @@ namespace Notepad
             {
                 case "ino":
                     return "Arduino";
-                    break;
                 case "cs":
                     return "C#";
-                    break;
                 case "cpp":
                     return "C++";
-                    break;
                 case "c":
                     return "C";
-                    break;
                 case "btwo":
                     return "Braintwo";
-                    break;
                 case "json":
                     return "Json";
-                    break;
                 case "xml":
                     return "Xml";
-                    break;
                 case "html":
                     return "HTML";
-                    break;
                 case "css":
                     return "CSS";
-                    break;
                 case "js":
                     return "JavaScript";
-                    break;
                 case "md":
                     return "MarkDown";
-                    break;
                 default:
                     return "Text";
-                    break;
 
             }
         }
@@ -104,7 +87,11 @@ namespace Notepad
             {
                 Post post = postServices.GetPostById(PostChoseHelper.POSTID); // 获取所选博客详细信息
                 PostUtil.WriteToCache(post); // 将博客内容读取到本地
-                setTextBox();
+                // 判断该博客是否为第一个选择的博客
+
+                editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
+                BindEditPosts();
+                // setTextBox();
             }
             else
             {
@@ -152,10 +139,13 @@ namespace Notepad
             {
                 MessageBox.Show("新建博客失败");
             }
-            setChosePost(postId, post.title, cachePath); // 设置当前Post信息
-            MessageBox.Show("新建博客: " + PostChoseHelper.POSTID + ":" + PostChoseHelper.TITLE + 
-                "\n缓存路径为: " + PostChoseHelper.FILEPATH);
-            setTextBox();
+            editPosts.Add(postId.ToString(), new KeyValuePair<string, string>(post.title, post.originalContent));
+            // setChosePost(postId, post.title, cachePath); // 设置当前Post信息
+            MessageBox.Show("新建博客: " + postId + ":" + post.title + 
+                "\n缓存路径为: " + cachePath);
+            WritePostEditPosById();
+            BindEditPosts();
+            // setTextBox();
 
         }
 
@@ -182,11 +172,14 @@ namespace Notepad
             if (!String.IsNullOrWhiteSpace(path))
             {
                 File.WriteAllText(path, textBox1.Text);
+                editPosts[PostChoseHelper.POSTID.ToString()] = 
+                    new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
                 if (PostChoseHelper.POSTID >= 0)
                 {
                     MessageBox.Show(postServices.UpdatePostById(PostChoseHelper.POSTID, path));
                     WritePostEditPosById();
                 }
+
             }
             else
             {
@@ -240,13 +233,13 @@ namespace Notepad
             if (wordWrapToolStripMenuItem.Checked == true)
             {
                 textBox1.WordWrap = false;
-                textBox1.ScrollBars = ScrollBars.Both;
+                textBox1.ScrollBars = RichTextBoxScrollBars.Both;
                 wordWrapToolStripMenuItem.Checked = false;
             }
             else
             {
                 textBox1.WordWrap = true;
-                textBox1.ScrollBars = ScrollBars.Vertical;
+                textBox1.ScrollBars = RichTextBoxScrollBars.Vertical;
                 wordWrapToolStripMenuItem.Checked = true;
             }
         }
@@ -350,14 +343,17 @@ namespace Notepad
             HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);  
             HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
             ChangePannel();
+            ChangePannelSize();
             LoadSettings(ReadSettings());
+            editPosts = new Dictionary<string, KeyValuePair<string, string>>();
         }
 
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
-            ChangePannel();
+            ChangePannelSize();
         }
 
+        // 热键对应功能代码
         protected override void WndProc(ref Message m)
         {
             const int WM_HOTKEY = 0x0312;
@@ -397,6 +393,27 @@ namespace Notepad
             else
                 this.Visible = true;
         }
+
+        private void ChangePannelSize()
+        {
+            panel1.Width = this.Width - 20;
+            panel1.Height = this.Height - 90;
+            if (preViewMD)
+            {
+                // webBrowser1.DocumentText = mdContent;
+                webBrowser1.Left = 5;
+                webBrowser1.Width = panel1.Width - 10;
+                webBrowser1.Top = 0;
+                webBrowser1.Height = panel1.Height - 10;
+            }
+            else
+            {
+                textBox1.Left = 5;
+                textBox1.Width = panel1.Width - 10;
+                textBox1.Top = 0;
+                textBox1.Height = panel1.Height - 10;
+            }
+        }
         // alt+V 切换文本和MarkDown预览模式
         private void ChangePannel()
         {
@@ -407,24 +424,16 @@ namespace Notepad
                 string originalContent = textBox1.Text;
                 // Markdown md = new Markdown();
                 // string mdContent = md.Transform(originalContent);
-                string mdContent = CommonMarkConverter.Convert(originalContent);
+                mdContent = CommonMarkConverter.Convert(originalContent);
                 webBrowser1.DocumentText = mdContent;
-                webBrowser1.Left = 5;
-                webBrowser1.Width = this.Width - 30;
-                webBrowser1.Top = 5;
-                webBrowser1.Height = this.Height - 100;
             }
             else
             {
                 webBrowser1.Hide();
                 textBox1.Show();
                 textBox1.Focus();
-                textBox1.Left = 5;
-                textBox1.Width = this.Width - 30;
-
-                textBox1.Top = 5;
-                textBox1.Height = this.Height - 100;
             }
+            ChangePannelSize(); 
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -510,7 +519,7 @@ namespace Notepad
                 postEditInfo.Add(new PostEditInfo(post.Id, 0));
             }
             string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
-            string tmpPath = @"D:\Notepad\BlogPad\temp\PostEditInfo.json";
+            string tmpPath = ConstantUtil.EDITPOSCACHE;
             FileStream fs = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.Read);
             fs.Close();
             StreamWriter sw = new StreamWriter(tmpPath);
@@ -525,6 +534,7 @@ namespace Notepad
         private void WritePostEditPosById()
         {
             Dictionary<int, int> oldInfo = ReadPostEditInfo();
+
             oldInfo[PostChoseHelper.POSTID] = this.textBox1.SelectionStart;
 
             List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
@@ -533,7 +543,7 @@ namespace Notepad
                 postEditInfo.Add(new PostEditInfo(post.Key, post.Value));
             }
             string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
-            string tmpPath = @"D:\Notepad\BlogPad\temp\PostEditInfo.json";
+            string tmpPath = ConstantUtil.EDITPOSCACHE;
 
             StreamWriter sw = new StreamWriter(tmpPath, false);
             sw.Write(jsonPosts);
@@ -546,7 +556,7 @@ namespace Notepad
          */
         private Dictionary<int, int> ReadPostEditInfo()
         {
-            StreamReader sr = new StreamReader(@"D:\Notepad\BlogPad\temp\PostEditInfo.json");
+            StreamReader sr = new StreamReader(ConstantUtil.EDITPOSCACHE);
             string jsoninfo = sr.ReadToEnd();
             sr.Close();
             JArray jo = (JArray)JsonConvert.DeserializeObject(jsoninfo);
@@ -564,6 +574,10 @@ namespace Notepad
         private int ReadPostEditPosById(int id)
         {
             var posts = ReadPostEditInfo();
+            if (!posts.ContainsKey(id))
+            {
+                posts.Add(PostChoseHelper.POSTID, 0);
+            }
             return posts[id];
         }
 
@@ -585,6 +599,29 @@ namespace Notepad
         {
             InitAllPost();
             ReadPostEditInfo();
+        }
+
+        private void BindEditPosts()
+        {
+            List<KeyValuePair<string, string>> lstCom = new List<KeyValuePair<string, string>>();
+            foreach (var post in editPosts)
+            {
+                lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
+            }
+            this.comboBox1.DataSource = lstCom;
+            // this.ucCombox1.Source = lstCom;
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            KeyValuePair <string, string> item = (KeyValuePair<string, string>) this.comboBox1.SelectedItem;
+            String filePath = ConstantUtil.CACHEPATH + item.Value;
+            setChosePost(int.Parse(item.Key), item.Value, filePath);
+            setTextBox();
+        }
+        private Boolean isSaved(string id)
+        {
+            return editPosts[id].Value.Equals(this.textBox1.Text);
         }
     }
 }

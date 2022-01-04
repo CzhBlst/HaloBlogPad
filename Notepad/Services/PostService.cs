@@ -117,9 +117,10 @@ namespace Notepad.Services
             {
                 var json = restResponse.Content;
                 JObject jo = (JObject)JsonConvert.DeserializeObject(json);
+                string id = jo["data"]["id"].ToString();
                 string title = jo["data"]["title"].ToString();
                 string originalContent = jo["data"]["originalContent"].ToString();
-                post = new Post(title, originalContent);
+                post = new Post(id, title, originalContent);
             }
             return post;
         }

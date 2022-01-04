@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,28 +62,15 @@
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getBlogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.initEditPostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.initEditPostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.textBox1 = new System.Windows.Forms.RichTextBox();
             this.menuStrip1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // textBox1
-            // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(3, 3);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(576, 574);
-            this.textBox1.TabIndex = 2;
-            this.textBox1.TabStop = false;
-            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
             // menuStrip1
             // 
@@ -350,10 +336,17 @@
             this.addBlogToolStripMenuItem.Text = "AddBlog";
             this.addBlogToolStripMenuItem.Click += new System.EventHandler(this.addNewPostToolStripMenuItem_Click);
             // 
+            // initEditPostToolStripMenuItem
+            // 
+            this.initEditPostToolStripMenuItem.Name = "initEditPostToolStripMenuItem";
+            this.initEditPostToolStripMenuItem.Size = new System.Drawing.Size(106, 21);
+            this.initEditPostToolStripMenuItem.Text = "InitEditPosition";
+            this.initEditPostToolStripMenuItem.Click += new System.EventHandler(this.initEditPostToolStripMenuItem_Click);
+            // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.webBrowser1);
             this.panel1.Controls.Add(this.textBox1);
+            this.panel1.Controls.Add(this.webBrowser1);
             this.panel1.Location = new System.Drawing.Point(2, 53);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1128, 577);
@@ -367,12 +360,23 @@
             this.webBrowser1.Size = new System.Drawing.Size(531, 558);
             this.webBrowser1.TabIndex = 1;
             // 
-            // initEditPostToolStripMenuItem
+            // comboBox1
             // 
-            this.initEditPostToolStripMenuItem.Name = "initEditPostToolStripMenuItem";
-            this.initEditPostToolStripMenuItem.Size = new System.Drawing.Size(106, 21);
-            this.initEditPostToolStripMenuItem.Text = "InitEditPosition";
-            this.initEditPostToolStripMenuItem.Click += new System.EventHandler(this.initEditPostToolStripMenuItem_Click);
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(317, 27);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(95, 20);
+            this.comboBox1.TabIndex = 7;
+            this.comboBox1.TabStop = false;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(0, 3);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(579, 528);
+            this.textBox1.TabIndex = 4;
+            this.textBox1.Text = "";
             // 
             // Form1
             // 
@@ -380,6 +384,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1130, 611);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip2);
             this.Controls.Add(this.labelFormat);
@@ -395,15 +400,12 @@
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
@@ -441,6 +443,8 @@
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem initEditPostToolStripMenuItem;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.RichTextBox textBox1;
     }
 }
 
