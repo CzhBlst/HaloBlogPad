@@ -4,8 +4,8 @@
 因为编辑博客需要切换到浏览器，比较麻烦，VScode中给出的Halo插件又无法使用，于是搞了这个博客本地编辑器
 
 #### 截图
-![编辑模式](https://gitee.com/blstcao/halo-blog-pad/blob/master/Capture/edit.png)
-![md预览](https://gitee.com/blstcao/halo-blog-pad/blob/master/Capture/md.png)
+![编辑模式](https://gitee.com/blstcao/halo-blog-pad/raw/master/Capture/edit.png)
+![md预览](https://gitee.com/blstcao/halo-blog-pad/raw/master/Capture/md.png)
 #### 软件架构
 + .Net FrameWork 4.8
 + Winform
