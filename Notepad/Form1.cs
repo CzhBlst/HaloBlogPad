@@ -4,9 +4,7 @@ using HZH_Controls.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NLog.Extensions.Logging;
 using Notepad.Bean;
-using Notepad.Handler;
 using Notepad.Services;
 using Notepad.Utils;
 using NotePad;
@@ -473,6 +471,11 @@ namespace Notepad
             sr.Close();
             // this.path = settingsFile;
             JObject jo = (JObject)JsonConvert.DeserializeObject(settingsText);
+            if (jo.Count < 4)
+            {
+                MessageBox.Show("请修改配置文件");
+                return new Setting();
+            }
             Setting settings = new Setting();
             settings.Url = jo["Url"].ToString();
             settings.CachePath = jo["CachePath"].ToString();
@@ -608,6 +611,11 @@ namespace Notepad
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (editPosts.Count > 1 && PostChoseHelper.POSTID > 0)
+            {
+                saveToolStripMenuItem_Click(sender, e);
+            }
+
             KeyValuePair<string, string> item = (KeyValuePair<string, string>)this.comboBox1.SelectedItem;
             String filePath = ConstantUtil.CACHEPATH + item.Value;
             setChosePost(int.Parse(item.Key), item.Value, filePath);
