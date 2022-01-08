@@ -5,7 +5,8 @@
 
 #### 截图
 ![编辑模式](https://gitee.com/blstcao/halo-blog-pad/raw/master/Capture/edit.png)
-![md预览](https://gitee.com/blstcao/halo-blog-pad/raw/master/Capture/md.png)
+![md模式](https://gitee.com/blstcao/halo-blog-pad/raw/master/Capture/md.png)
+
 #### 软件架构
 + .Net FrameWork 4.8
 + Winform
