@@ -36,9 +36,9 @@ namespace NotePad
         private void button1_Click(object sender, EventArgs e)
         {
             PostInfo test = (PostInfo)this.ucDataGridView1.SelectRow.DataSource;
-            PostChoseHelper.POSTID = test.Id;
-            PostChoseHelper.TITLE = test.Title;
-            PostChoseHelper.FILEPATH = ConstantUtil.CACHEPATH + test.Title;
+            AddBlogToEdits.POSTID = test.Id;
+            AddBlogToEdits.TITLE = test.Title;
+            AddBlogToEdits.FILEPATH = ConstantUtil.CACHEPATH + test.Title;
             // Console.WriteLine(test.ToString());
             this.Close();
         }

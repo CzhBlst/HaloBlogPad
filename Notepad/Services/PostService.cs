@@ -120,6 +120,7 @@ namespace Notepad.Services
                 string id = jo["data"]["id"].ToString();
                 string title = jo["data"]["title"].ToString();
                 string originalContent = jo["data"]["originalContent"].ToString();
+                string mdContent = jo["data"]["formatContent"].ToString();
                 post = new Post(id, title, originalContent);
             }
             return post;
@@ -171,6 +172,32 @@ namespace Notepad.Services
             string originalContent = readStream.ReadToEnd();
             readStream.Close();
             var jsonPost = JsonConvert.SerializeObject(new Post(title, originalContent));
+
+            request.AddJsonBody(jsonPost);
+
+            IRestResponse restResponse = client.Execute(request);
+
+            string statusCode = restResponse.StatusCode.ToString();
+            if (restResponse.IsSuccessful)
+            {
+                return "success";
+            }
+            return "error";
+        }
+
+        /*
+         * 通过Id，标题，当前文本内容更新博客
+         */
+        public string UpdatePostById(int id, string title, string originalContent)
+        {
+            RestClient client = new RestClient(ConstantUtil.URL);
+            string uri = @"/api/admin/posts/" + id;
+            var request = new RestRequest(uri, Method.PUT);
+            client.AddDefaultHeader("ADMIN-Authorization", token);
+            // 将更新的Post状态默认修改为Published
+            Post post = new Post(title, originalContent);
+            post.status = "PUBLISHED";
+            var jsonPost = JsonConvert.SerializeObject(post);
 
             request.AddJsonBody(jsonPost);
 

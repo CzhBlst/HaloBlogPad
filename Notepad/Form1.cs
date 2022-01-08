@@ -1,10 +1,12 @@
 ﻿using CommonMark;
+using HZH_Controls.Controls;
 using HZH_Controls.Forms;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog.Extensions.Logging;
 using Notepad.Bean;
+using Notepad.Handler;
 using Notepad.Services;
 using Notepad.Utils;
 using NotePad;
@@ -24,6 +26,7 @@ namespace Notepad
         int currentPost;
         Boolean isLogin = false;
         Boolean preViewMD = false;
+        Boolean isSaved = true;
         String mdContent = "";
         PostService postServices;
         // id, title, content
@@ -31,49 +34,55 @@ namespace Notepad
 
         public Form1() => InitializeComponent();
 
-        private string ReturnMessageFromFormat(string type)
+        /*
+         * 窗口加载时注册热键，并更改各个组件位置
+         */
+        private void Form1_Load_1(object sender, EventArgs e)
         {
-            switch (type)
+            checkLogin();
+            if (isLogin)
             {
-                case "ino":
-                    return "Arduino";
-                case "cs":
-                    return "C#";
-                case "cpp":
-                    return "C++";
-                case "c":
-                    return "C";
-                case "btwo":
-                    return "Braintwo";
-                case "json":
-                    return "Json";
-                case "xml":
-                    return "Xml";
-                case "html":
-                    return "HTML";
-                case "css":
-                    return "CSS";
-                case "js":
-                    return "JavaScript";
-                case "md":
-                    return "MarkDown";
-                default:
-                    return "Text";
+                this.loginToolStripMenuItem.Text = "重新登录";
+            }
+            HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);
+            HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
+            this.MinimumSize = new System.Drawing.Size(500, 400);
+            // comboBox1.Left = this.Width - 180;
+            ChangePannel();
+            ChangePannelSize();
+            LoadSettings(ReadSettings());
+            editPosts = new Dictionary<string, KeyValuePair<string, string>>();
+        }
 
+        private void checkLogin()
+        {
+            // 检查登录状态
+            AuthService authService = new AuthService();
+            LoginInfo lastToken = authService.getLastLoginToken();
+            if (lastToken == null || !authService.checkToken(lastToken))
+            {
+                // 未登陆过或是token已过期
+                isLogin = false;
+            }
+            else
+            {
+                token = lastToken.UsingToken;
+                postServices = new PostService(token);
+                isLogin = true;
             }
         }
 
         private void loginToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AuthService authService = new AuthService();
-            token = authService.Login();
+            token = authService.Login().UsingToken;
             if (token.Equals("error"))
             {
                 MessageBox.Show("登录失败");
             }
             else
             {
-                MessageBox.Show("登录成功，连接到博客服务...");
+                MessageBox.Show("登录成功");
                 postServices = new PostService(token);
                 isLogin = true;
             }
@@ -83,15 +92,12 @@ namespace Notepad
         {
             Form postsForm = new Form3(token);
             postsForm.ShowDialog();
-            if (!PostChoseHelper.TITLE.Equals(""))
+            if (!AddBlogToEdits.TITLE.Equals(""))
             {
-                Post post = postServices.GetPostById(PostChoseHelper.POSTID); // 获取所选博客详细信息
+                Post post = postServices.GetPostById(AddBlogToEdits.POSTID); // 获取所选博客详细信息
                 PostUtil.WriteToCache(post); // 将博客内容读取到本地
-                // 判断该博客是否为第一个选择的博客
-
                 editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
                 BindEditPosts();
-                // setTextBox();
             }
             else
             {
@@ -140,13 +146,11 @@ namespace Notepad
                 MessageBox.Show("新建博客失败");
             }
             editPosts.Add(postId.ToString(), new KeyValuePair<string, string>(post.title, post.originalContent));
-            // setChosePost(postId, post.title, cachePath); // 设置当前Post信息
             MessageBox.Show("新建博客: " + postId + ":" + post.title + 
                 "\n缓存路径为: " + cachePath);
+            // 增加新的博客编辑位置
             WritePostEditPosById();
             BindEditPosts();
-            // setTextBox();
-
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -155,7 +159,7 @@ namespace Notepad
             {
                 textBox1.Text = File.ReadAllText(path = openFileDialog1.FileName);
                 string[] SplitExtension = openFileDialog1.FileName.Split('.');
-                labelFormat.Text = ReturnMessageFromFormat(SplitExtension[1]);
+                // labelFormat.Text = ReturnMessageFromFormat(SplitExtension[1]);
             }
         }
 
@@ -176,10 +180,11 @@ namespace Notepad
                     new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
                 if (PostChoseHelper.POSTID >= 0)
                 {
-                    MessageBox.Show(postServices.UpdatePostById(PostChoseHelper.POSTID, path));
+                    postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
                     WritePostEditPosById();
+                    isSaved = true;
+                    this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
                 }
-
             }
             else
             {
@@ -189,11 +194,14 @@ namespace Notepad
 
         private void exitPrompt()
         {
-            DialogResult = MessageBox.Show("Do you want to save current file?",
+            if (!isSaved)
+            {
+                DialogResult = MessageBox.Show("Do you want to save current file?",
                 "Notepad",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
+            }
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -335,19 +343,6 @@ namespace Notepad
             this.BackColor = Color.White;
         }
 
-        /*
-         * 窗口加载时注册热键，并更改各个组件位置
-         */
-        private void Form1_Load_1(object sender, EventArgs e)
-        {   
-            HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);  
-            HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
-            ChangePannel();
-            ChangePannelSize();
-            LoadSettings(ReadSettings());
-            editPosts = new Dictionary<string, KeyValuePair<string, string>>();
-        }
-
         private void Form1_SizeChanged(object sender, EventArgs e)
         {
             ChangePannelSize();
@@ -398,6 +393,7 @@ namespace Notepad
         {
             panel1.Width = this.Width - 20;
             panel1.Height = this.Height - 90;
+            comboBox1.Left = this.Width - 180;
             if (preViewMD)
             {
                 // webBrowser1.DocumentText = mdContent;
@@ -422,10 +418,10 @@ namespace Notepad
                 textBox1.Hide();
                 webBrowser1.Show();
                 string originalContent = textBox1.Text;
-                // Markdown md = new Markdown();
-                // string mdContent = md.Transform(originalContent);
                 mdContent = CommonMarkConverter.Convert(originalContent);
+                string url = ConstantUtil.URL + "/archives/" + PostChoseHelper.TITLE;
                 webBrowser1.DocumentText = mdContent;
+                // webBrowser1.
             }
             else
             {
@@ -465,6 +461,9 @@ namespace Notepad
             this.path = PostChoseHelper.FILEPATH;
         }
 
+        /*
+         * 读取配置
+         */
         private Setting ReadSettings()
         {
             PostChoseHelper.POSTID = -1; // 重置博客，防止将settings提交到博客
@@ -498,7 +497,10 @@ namespace Notepad
             sr.Write(settingsContent);
             sr.Close();
         }
-
+        
+        /*
+         * 加载配置
+         */
         private void LoadSettings(Setting setting)
         {
             ConstantUtil.CACHEPATH = setting.CachePath;
@@ -570,6 +572,7 @@ namespace Notepad
         }
 
         /*
+         * 根据ID读取博客编辑位置
          */
         private int ReadPostEditPosById(int id)
         {
@@ -581,26 +584,18 @@ namespace Notepad
             return posts[id];
         }
 
-        private void testLog()
-        {
-            ServiceCollection services = new ServiceCollection();
-
-            services.AddLogging(logBuilder => {
-                logBuilder.AddNLog();
-            });
-            services.AddScoped<LogHelper>();
-            using (var sp = services.BuildServiceProvider()) {
-                LogHelper logger = sp.GetRequiredService<LogHelper>();
-                logger.Test();
-            }
-        }
-
+        /*
+         * 初始化编辑位置
+         */
         private void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
         {
             InitAllPost();
             ReadPostEditInfo();
         }
 
+        /*
+         * 添加正在编辑的博客到List
+         */
         private void BindEditPosts()
         {
             List<KeyValuePair<string, string>> lstCom = new List<KeyValuePair<string, string>>();
@@ -609,19 +604,20 @@ namespace Notepad
                 lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
             }
             this.comboBox1.DataSource = lstCom;
-            // this.ucCombox1.Source = lstCom;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            KeyValuePair <string, string> item = (KeyValuePair<string, string>) this.comboBox1.SelectedItem;
+            KeyValuePair<string, string> item = (KeyValuePair<string, string>)this.comboBox1.SelectedItem;
             String filePath = ConstantUtil.CACHEPATH + item.Value;
             setChosePost(int.Parse(item.Key), item.Value, filePath);
             setTextBox();
         }
-        private Boolean isSaved(string id)
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            return editPosts[id].Value.Equals(this.textBox1.Text);
+            this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
+            isSaved = false;
         }
     }
 }

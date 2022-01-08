@@ -12,6 +12,6 @@ namespace Notepad.Utils
         public static string URL = "";
         public static string USERNAME = "";
         public static string PASSWORD = "";
-        public static string EDITPOSCACHE = @"E:\Notepad\BlogPad\Cache\BlogEditPosCache\EditPosition.json";
+        public static string EDITPOSCACHE = @"./EditPosition.json";
     }
 }
