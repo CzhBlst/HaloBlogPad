@@ -188,7 +188,7 @@ namespace Notepad.Services
         /*
          * 通过Id，标题，当前文本内容更新博客
          */
-        public string UpdatePostById(int id, string title, string originalContent)
+        public bool UpdatePostById(int id, string title, string originalContent)
         {
             RestClient client = new RestClient(ConstantUtil.URL);
             string uri = @"/api/admin/posts/" + id;
@@ -206,9 +206,9 @@ namespace Notepad.Services
             string statusCode = restResponse.StatusCode.ToString();
             if (restResponse.IsSuccessful)
             {
-                return "success";
+                return true;
             }
-            return "error";
+            return false;
         }
 
     }

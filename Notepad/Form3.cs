@@ -12,6 +12,7 @@ namespace NotePad
     {
         public Form3(string token)
         {
+            this.Text = "博客选择";
             InitializeComponent();
             PostService postServices = new PostService(token);
             var posts = postServices.GetAllPost();
@@ -25,8 +26,6 @@ namespace NotePad
             {
                 dataSource.Add(post);
             }
-            UCPagerControl page = new UCPagerControl();
-            page.DataSource = dataSource;
             this.ucDataGridView1.DataSource = dataSource;
 
             // this.ucDataGridView1.First();

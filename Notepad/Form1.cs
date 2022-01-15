@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Notepad
@@ -29,6 +30,7 @@ namespace Notepad
         PostService postServices;
         // id, title, content
         Dictionary<String, KeyValuePair<String, String>> editPosts;
+        private Thread loginCheckTrd; // 用来检测Token是否过期
 
         public Form1() => InitializeComponent();
 
@@ -50,6 +52,22 @@ namespace Notepad
             ChangePannelSize();
             LoadSettings(ReadSettings());
             editPosts = new Dictionary<string, KeyValuePair<string, string>>();
+            // textBox1.Font.Size = 12;
+            // 修改默认字体大小
+            textBox1.Font = new Font(textBox1.Font.FontFamily, 12, textBox1.Font.Style);
+            // 创建线程，检测Token是否过期
+            loginCheckTrd = new Thread(new ThreadStart(this.LoginCheckThreadTask));
+            loginCheckTrd.IsBackground = true;
+            loginCheckTrd.Start();
+        }
+
+        private void LoginCheckThreadTask()
+        {
+            while (true)
+            {
+                checkLogin();
+                Thread.Sleep(10000);
+            }
         }
 
         private void checkLogin()
@@ -61,12 +79,14 @@ namespace Notepad
             {
                 // 未登陆过或是token已过期
                 isLogin = false;
+                this.loginToolStripMenuItem.Text = "Login";
             }
             else
             {
                 token = lastToken.UsingToken;
                 postServices = new PostService(token);
                 isLogin = true;
+                this.loginToolStripMenuItem.Text = "重新登录";
             }
         }
 
@@ -81,6 +101,7 @@ namespace Notepad
             else
             {
                 MessageBox.Show("登录成功");
+                this.loginToolStripMenuItem.Text = "重新登录";
                 postServices = new PostService(token);
                 isLogin = true;
             }
@@ -178,10 +199,10 @@ namespace Notepad
                     new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
                 if (PostChoseHelper.POSTID >= 0)
                 {
-                    postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
+                    isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
                     WritePostEditPosById();
-                    isSaved = true;
-                    this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
+                    if (isSaved)
+                        this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
                 }
             }
             else
@@ -200,6 +221,12 @@ namespace Notepad
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
             }
+        }
+        //相应的查找子菜单
+        private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SearchForm f2 = new SearchForm(this);
+            f2.Show();
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -255,6 +282,7 @@ namespace Notepad
             if (fontDialog1.ShowDialog() == DialogResult.OK)
             {
                 textBox1.Font = textBox1.Font = new Font(fontDialog1.Font, fontDialog1.Font.Style);
+
                 textBox1.ForeColor = fontDialog1.Color;
             }
         }
@@ -314,6 +342,10 @@ namespace Notepad
                         {
                             this.TopMost = true;
                         }
+                        break;
+                    case Keys.F:
+                        e.SuppressKeyPress= true;
+                        SearchToolStripMenuItem_Click(sender, e);
                         break;
                 }
             }
