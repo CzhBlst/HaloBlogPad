@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace NotePad
 {
-    public partial class Form3 : Form
+    public partial class BlogChoseForm : Form
     {
-        public Form3(string token)
+        public BlogChoseForm(string token)
         {
             this.Text = "博客选择";
             InitializeComponent();

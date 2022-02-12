@@ -2,6 +2,7 @@
 using HZH_Controls.Controls;
 using HZH_Controls.Forms;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Notepad.Bean;
@@ -31,6 +32,7 @@ namespace Notepad
         // id, title, content
         Dictionary<String, KeyValuePair<String, String>> editPosts;
         private Thread loginCheckTrd; // 用来检测Token是否过期
+        private Thread autoSaveTrd;
 
         public Form1() => InitializeComponent();
 
@@ -44,12 +46,8 @@ namespace Notepad
             {
                 this.loginToolStripMenuItem.Text = "重新登录";
             }
-            HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);
-            HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
-            this.MinimumSize = new System.Drawing.Size(500, 400);
-            // comboBox1.Left = this.Width - 180;
-            ChangePannel();
-            ChangePannelSize();
+            HotKeyRegister();
+            ChangePannelLayOut();
             LoadSettings(ReadSettings());
             editPosts = new Dictionary<string, KeyValuePair<string, string>>();
             // textBox1.Font.Size = 12;
@@ -59,14 +57,81 @@ namespace Notepad
             loginCheckTrd = new Thread(new ThreadStart(this.LoginCheckThreadTask));
             loginCheckTrd.IsBackground = true;
             loginCheckTrd.Start();
+            autoSaveTrd = new Thread(new ThreadStart(this.AutoSaveThreadTask));
+            autoSaveTrd.IsBackground = true;
+            autoSaveTrd.Start();
         }
 
+        /*
+         * 主窗体退出时记录位置
+         */
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            RegistryKey reg1 = Registry.CurrentUser;
+            RegistryKey reg2 = reg1.CreateSubKey("SoftWare\\BlogPad");
+            reg2.SetValue("MainFormX", this.Location.X);
+            reg2.SetValue("MainFormY", this.Location.Y);
+        }
+
+        /*
+         * 修改界面位置
+         */
+        private void ChangePannelLayOut()
+        {
+            RegistryKey reg = Registry.CurrentUser.CreateSubKey("SoftWare\\BlogPad");
+            this.Location = new Point(Convert.ToInt32(reg.GetValue("MainFormX")), 
+                Convert.ToInt32(reg.GetValue("MainFormY")));
+            this.Size = new System.Drawing.Size(650, 550);
+            this.MinimumSize = new System.Drawing.Size(600, 500);
+            // comboBox1.Left = this.Width - 180;
+            ChangePannel();
+            ChangePannelSize();
+        }
+
+        /*
+         * 注册快捷键
+         */
+        private void HotKeyRegister()
+        {
+            HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);
+            HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
+        }
+
+        /*
+         * 启动线程，每隔十秒检测一次登录是否过期
+         */
         private void LoginCheckThreadTask()
         {
             while (true)
             {
                 checkLogin();
                 Thread.Sleep(10000);
+            }
+        }
+        /*
+         * 自动保存
+         */
+        private void AutoSaveThreadTask()
+        {
+            while (true)
+            {
+                if (!String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
+                {
+                    this.Invoke(new EventHandler(delegate
+                    {
+                        File.WriteAllText(path, textBox1.Text);
+                        editPosts[PostChoseHelper.POSTID.ToString()] =
+                            new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
+                        if (PostChoseHelper.POSTID >= 0)
+                        {
+                            isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
+                            WritePostEditPosById();
+                            if (isSaved)
+                                this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " auto saved";
+                        }
+                    }));
+                }
+                Thread.Sleep(102400);
             }
         }
 
@@ -90,10 +155,11 @@ namespace Notepad
             }
         }
 
-        private void loginToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void loginToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AuthService authService = new AuthService();
-            token = authService.Login().UsingToken;
+            LoginInfo info = await authService.LoginAsync();
+            token = info.UsingToken;
             if (token.Equals("error"))
             {
                 MessageBox.Show("登录失败");
@@ -109,14 +175,22 @@ namespace Notepad
 
         private void getBlogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Form postsForm = new Form3(token);
+            Form postsForm = new BlogChoseForm(token);
             postsForm.ShowDialog();
             if (!AddBlogToEdits.TITLE.Equals(""))
             {
                 Post post = postServices.GetPostById(AddBlogToEdits.POSTID); // 获取所选博客详细信息
                 PostUtil.WriteToCache(post); // 将博客内容读取到本地
-                editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
-                BindEditPosts();
+                try
+                {
+                    editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
+                    BindEditPosts();
+                } 
+                catch (ArgumentException e1)
+                {
+                    Console.WriteLine(e1.StackTrace);
+                }
+                
             }
             else
             {
@@ -659,5 +733,7 @@ namespace Notepad
             this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
             isSaved = false;
         }
+
+
     }
 }

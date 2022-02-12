@@ -1,7 +1,7 @@
 ﻿
 namespace NotePad
 {
-    partial class Form3
+    partial class BlogChoseForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -62,15 +62,15 @@ namespace NotePad
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // Form3
+            // BlogChoseForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 382);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.ucDataGridView1);
-            this.Name = "Form3";
-            this.Text = "Form3";
+            this.Name = "BlogChoseForm";
+            this.Text = "BlogChoseForm";
             this.ResumeLayout(false);
 
         }
