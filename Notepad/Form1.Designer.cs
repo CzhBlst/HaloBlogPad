@@ -404,6 +404,7 @@ namespace Notepad
             this.AutoSaveBox.Name = "AutoSaveBox";
             this.AutoSaveBox.Size = new System.Drawing.Size(72, 16);
             this.AutoSaveBox.TabIndex = 8;
+            this.AutoSaveBox.TabStop = false;
             this.AutoSaveBox.Text = "AutoSave";
             this.AutoSaveBox.UseVisualStyleBackColor = true;
             // 

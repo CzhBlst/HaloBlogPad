@@ -115,7 +115,7 @@ namespace Notepad
         {
             while (true)
             {
-                if (!String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
+                if (isLogin && !String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
                 {
                     this.Invoke(new EventHandler(delegate
                     {
@@ -126,12 +126,13 @@ namespace Notepad
                         {
                             isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
                             WritePostEditPosById();
-                            if (isSaved)
-                                this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " auto saved";
+                            if (!isSaved)
+                                FrmTips.ShowTipsError(this, "自动保存失败");
+                            // this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " auto saved";
                         }
                     }));
                 }
-                Thread.Sleep(102400);
+                Thread.Sleep(10010);
             }
         }
 
@@ -162,11 +163,11 @@ namespace Notepad
             token = info.UsingToken;
             if (token.Equals("error"))
             {
-                MessageBox.Show("登录失败");
+                FrmTips.ShowTipsError(this, "登录失败");
             }
             else
             {
-                MessageBox.Show("登录成功");
+                FrmTips.ShowTipsInfo(this, "登录成功");
                 this.loginToolStripMenuItem.Text = "重新登录";
                 postServices = new PostService(token);
                 isLogin = true;
@@ -236,10 +237,10 @@ namespace Notepad
             int postId = postServices.AddNewPost(post.title);
             if (postId == -1)
             {
-                MessageBox.Show("新建博客失败");
+                FrmTips.ShowTipsError(this, "新建博客失败");
             }
             editPosts.Add(postId.ToString(), new KeyValuePair<string, string>(post.title, post.originalContent));
-            MessageBox.Show("新建博客: " + postId + ":" + post.title + 
+            FrmTips.ShowTipsInfo(this, "新建博客: " + postId + ":" + post.title + 
                 "\n缓存路径为: " + cachePath);
             // 增加新的博客编辑位置
             WritePostEditPosById();
