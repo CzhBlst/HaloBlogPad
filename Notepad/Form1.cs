@@ -29,6 +29,8 @@ namespace Notepad
         Boolean preViewMD = false;
         Boolean isSaved = true;
         String mdContent = "";
+        String text = "";
+        int editPos = 0;
         PostService postServices;
         // id, title, content
         Dictionary<String, KeyValuePair<String, String>> editPosts;
@@ -120,12 +122,12 @@ namespace Notepad
                 {
                     this.Invoke(new EventHandler(delegate
                     {
-                        File.WriteAllText(path, textBox1.Text);
+                        File.WriteAllText(path, text);
                         editPosts[PostChoseHelper.POSTID.ToString()] =
-                            new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
+                            new KeyValuePair<string, string>(PostChoseHelper.TITLE, text);
                         if (PostChoseHelper.POSTID >= 0)
                         {
-                            isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
+                            isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, text);
                             WritePostEditPosById();
                             if (!isSaved)
                                 FrmTips.ShowTipsError(this, "自动保存失败");
@@ -159,23 +161,26 @@ namespace Notepad
             LoginInfo lastToken = authService.getLastLoginToken();
             if (lastToken == null || !authService.checkToken(lastToken))
             {
-                // 未登陆过或是token已过期
                 isLogin = false;
                 this.loginToolStripMenuItem.Text = "Login";
-                LoginInfo info = await authService.LoginAsync();
-                token = info.UsingToken;
-                if (token.Equals("error"))
+                if (AutoLogin.Checked)
                 {
-                    FrmTips.ShowTipsError(this, "自动登录失败");
+                    LoginInfo info = await authService.LoginAsync();
+                    token = info.UsingToken;
+                    if (token.Equals("error"))
+                    {
+                        FrmTips.ShowTipsError(this, "自动登录失败");
+                    }
+                    else
+                    {
+                        lastToken = info;
+                        FrmTips.ShowTipsInfo(this, "登录过期，已自动重新登录");
+                        this.loginToolStripMenuItem.Text = "重新登录";
+                        postServices = new PostService(token);
+                        isLogin = true;
+                    }
                 }
-                else
-                {
-                    lastToken = info;
-                    FrmTips.ShowTipsInfo(this, "登录过期，已自动重新登录");
-                    this.loginToolStripMenuItem.Text = "重新登录";
-                    postServices = new PostService(token);
-                    isLogin = true;
-                }
+                // 未登陆过或是token已过期
             }
             else
             {
@@ -688,7 +693,7 @@ namespace Notepad
         {
             Dictionary<int, int> oldInfo = ReadPostEditInfo();
 
-            oldInfo[PostChoseHelper.POSTID] = this.textBox1.SelectionStart;
+            oldInfo[PostChoseHelper.POSTID] = editPos;
 
             List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
             foreach (var post in oldInfo)
@@ -774,8 +779,8 @@ namespace Notepad
         {
             this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
             isSaved = false;
+            text = textBox1.Text;
+            editPos = textBox1.SelectionStart;
         }
-
-
     }
 }

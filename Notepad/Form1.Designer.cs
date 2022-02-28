@@ -71,6 +71,7 @@ namespace Notepad
             this.textBox1 = new System.Windows.Forms.RichTextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.AutoSaveBox = new System.Windows.Forms.CheckBox();
+            this.AutoLogin = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -408,12 +409,24 @@ namespace Notepad
             this.AutoSaveBox.Text = "AutoSave";
             this.AutoSaveBox.UseVisualStyleBackColor = true;
             // 
+            // AutoLogin
+            // 
+            this.AutoLogin.AutoSize = true;
+            this.AutoLogin.Location = new System.Drawing.Point(323, 6);
+            this.AutoLogin.Name = "AutoLogin";
+            this.AutoLogin.Size = new System.Drawing.Size(78, 16);
+            this.AutoLogin.TabIndex = 9;
+            this.AutoLogin.TabStop = false;
+            this.AutoLogin.Text = "AutoLogin";
+            this.AutoLogin.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1129, 611);
+            this.Controls.Add(this.AutoLogin);
             this.Controls.Add(this.AutoSaveBox);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.panel1);
@@ -479,6 +492,7 @@ namespace Notepad
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.CheckBox AutoSaveBox;
+        private System.Windows.Forms.CheckBox AutoLogin;
     }
 }
 
