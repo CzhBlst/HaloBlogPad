@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -131,12 +132,27 @@ namespace Notepad
                             // this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " auto saved";
                         }
                     }));
+                } 
+                else if (!isLogin && AutoSaveBox.Checked)
+                {
+                    this.Invoke(new EventHandler(delegate
+                    {
+                        FrmTips.ShowTipsError(this, "未登录或Token已过期");
+                    }));
+                    
                 }
-                Thread.Sleep(10010);
+                else if (!String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
+                {
+                    this.Invoke(new EventHandler(delegate
+                    {
+                        FrmTips.ShowTipsError(this, "未登录或Token已过期");
+                    }));
+                }
+                Thread.Sleep(22333);
             }
         }
 
-        private void checkLogin()
+        private async void checkLogin()
         {
             // 检查登录状态
             AuthService authService = new AuthService();
@@ -146,6 +162,20 @@ namespace Notepad
                 // 未登陆过或是token已过期
                 isLogin = false;
                 this.loginToolStripMenuItem.Text = "Login";
+                LoginInfo info = await authService.LoginAsync();
+                token = info.UsingToken;
+                if (token.Equals("error"))
+                {
+                    FrmTips.ShowTipsError(this, "自动登录失败");
+                }
+                else
+                {
+                    lastToken = info;
+                    FrmTips.ShowTipsInfo(this, "登录过期，已自动重新登录");
+                    this.loginToolStripMenuItem.Text = "重新登录";
+                    postServices = new PostService(token);
+                    isLogin = true;
+                }
             }
             else
             {
@@ -526,6 +556,11 @@ namespace Notepad
                 mdContent = CommonMarkConverter.Convert(originalContent);
                 string url = ConstantUtil.URL + "/archives/" + PostChoseHelper.TITLE;
                 webBrowser1.DocumentText = mdContent;
+                // int pos = GetScrollPos(textBox1.Handle, 0);
+                int pos = GetScrollPos(textBox1.Handle, 1);
+                // int top = webBrowser1.Document.GetElementsByTagName("HTML")[0].ScrollTop;//滚动条垂直位置
+                // webBrowser1.Document.Window.ScrollTo(new Point(1517, pos));
+                // webBrowser1.AutoScrollOffset.Offset(1883, 722); 
                 // webBrowser1.
             }
             else
@@ -536,6 +571,12 @@ namespace Notepad
             }
             ChangePannelSize(); 
         }
+
+        [DllImport("user32.dll", EntryPoint = "GetScrollPos")]
+        public static extern int GetScrollPos(
+            IntPtr hwnd,
+            int nBar
+        );
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
