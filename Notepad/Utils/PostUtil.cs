@@ -10,6 +10,8 @@ namespace Notepad.Utils
 {
     class PostUtil
     {
+        // 文章保存时提交的默认状态
+        public static String DefaultStatus = "DRAFT";
         /*
          * 将博客内容缓存到本地进行处理
          */

@@ -51,7 +51,7 @@ namespace Notepad
             }
             HotKeyRegister();
             ChangePannelLayOut();
-            LoadSettings(ReadSettings());
+            SettingHelper.LoadSettings(SettingHelper.ReadSettings());
             editPosts = new Dictionary<string, KeyValuePair<string, string>>();
             // textBox1.Font.Size = 12;
             // 修改默认字体大小
@@ -127,7 +127,7 @@ namespace Notepad
                             new KeyValuePair<string, string>(PostChoseHelper.TITLE, text);
                         if (PostChoseHelper.POSTID >= 0)
                         {
-                            isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, text);
+                            isSaved = postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, text).Result;
                             WritePostEditPosById();
                             if (!isSaved)
                                 FrmTips.ShowTipsError(this, "自动保存失败");
@@ -150,7 +150,7 @@ namespace Notepad
                         FrmTips.ShowTipsError(this, "未登录或Token已过期");
                     }));
                 }
-                Thread.Sleep(22333);
+                Thread.Sleep(12333);
             }
         }
 
@@ -309,7 +309,7 @@ namespace Notepad
                     new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
                 if (PostChoseHelper.POSTID >= 0)
                 {
-                    isSaved = postServices.UpdatePostById(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
+                    isSaved = postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text).Result;
                     WritePostEditPosById();
                     if (isSaved)
                         this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
@@ -585,7 +585,7 @@ namespace Notepad
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Setting setting = ReadSettings();
+            Setting setting = SettingHelper.ReadSettings();
             FrmInputs frm = new FrmInputs("博客设置",
                 new string[] { "博客地址", "缓存路径", "账号(邮箱)", "密码" },
                 defaultValues: new Dictionary<string, string> { { "博客地址", setting.Url },
@@ -606,63 +606,10 @@ namespace Notepad
             {
                 return;
             }
-            WriteSettings(setting);
-            LoadSettings(setting);
+            SettingHelper.WriteSettings(setting);
+            SettingHelper.LoadSettings(setting);
             PostChoseHelper.POSTID = currentPost;
             this.path = PostChoseHelper.FILEPATH;
-        }
-
-        /*
-         * 读取配置
-         */
-        private Setting ReadSettings()
-        {
-            PostChoseHelper.POSTID = -1; // 重置博客，防止将settings提交到博客
-            string settingsFile = "./settings.json";
-            StreamReader sr = new StreamReader(settingsFile);
-            string settingsText = sr.ReadToEnd();
-            sr.Close();
-            // this.path = settingsFile;
-            JObject jo = (JObject)JsonConvert.DeserializeObject(settingsText);
-            if (jo.Count < 4)
-            {
-                MessageBox.Show("请修改配置文件");
-                return new Setting();
-            }
-            Setting settings = new Setting();
-            settings.Url = jo["Url"].ToString();
-            settings.CachePath = jo["CachePath"].ToString();
-            settings.Username = jo["Username"].ToString();
-            settings.Password = jo["Password"].ToString();
-            if (settings.Url == "" ||
-                settings.CachePath == "" ||
-                settings.Username == "" ||
-                settings.Password == "")
-            {
-                MessageBox.Show("请修改配置文件");
-            }
-            return settings;
-        }
-
-        private void WriteSettings(Setting setting)
-        {
-            string settingsFile = "./settings.json";
-            this.path = settingsFile;
-            string settingsContent = JsonConvert.SerializeObject(setting);
-            StreamWriter sr = new StreamWriter(settingsFile, append: false);
-            sr.Write(settingsContent);
-            sr.Close();
-        }
-        
-        /*
-         * 加载配置
-         */
-        private void LoadSettings(Setting setting)
-        {
-            ConstantUtil.CACHEPATH = setting.CachePath;
-            ConstantUtil.URL = setting.Url;
-            ConstantUtil.USERNAME = setting.Username;
-            ConstantUtil.PASSWORD = setting.Password;
         }
 
         /*
@@ -693,7 +640,7 @@ namespace Notepad
         {
             Dictionary<int, int> oldInfo = ReadPostEditInfo();
 
-            oldInfo[PostChoseHelper.POSTID] = editPos;
+            oldInfo[PostChoseHelper.POSTID] = this.textBox1.SelectionStart;
 
             List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
             foreach (var post in oldInfo)
@@ -780,7 +727,6 @@ namespace Notepad
             this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
             isSaved = false;
             text = textBox1.Text;
-            editPos = textBox1.SelectionStart;
         }
     }
 }

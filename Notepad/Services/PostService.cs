@@ -167,6 +167,7 @@ namespace Notepad.Services
             var request = new RestRequest(uri, Method.PUT);
             client.AddDefaultHeader("ADMIN-Authorization", token);
             Post post = GetPostById(id);
+            post.status = PostUtil.DefaultStatus;
             string title = post.title;
             StreamReader readStream = new StreamReader(path);
             string originalContent = readStream.ReadToEnd();
@@ -196,13 +197,33 @@ namespace Notepad.Services
             client.AddDefaultHeader("ADMIN-Authorization", token);
             // 将更新的Post状态默认修改为Published
             Post post = new Post(title, originalContent);
-            post.status = "PUBLISHED";
+            post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
 
             request.AddJsonBody(jsonPost);
 
             IRestResponse restResponse = client.Execute(request);
 
+            string statusCode = restResponse.StatusCode.ToString();
+            if (restResponse.IsSuccessful)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> UpdatePostByIdAsync(int id, string title, string originalContent)
+        {
+            RestClient client = new RestClient(ConstantUtil.URL);
+            string uri = @"/api/admin/posts/" + id;
+            var request = new RestRequest(uri, Method.PUT);
+            client.AddDefaultHeader("ADMIN-Authorization", token);
+            // 将更新的Post状态默认修改为Published
+            Post post = new Post(title, originalContent);
+            post.status = PostUtil.DefaultStatus;
+            var jsonPost = JsonConvert.SerializeObject(post);
+            request.AddJsonBody(jsonPost);
+            IRestResponse restResponse = client.Execute(request);
             string statusCode = restResponse.StatusCode.ToString();
             if (restResponse.IsSuccessful)
             {
