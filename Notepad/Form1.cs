@@ -120,15 +120,15 @@ namespace Notepad
             {
                 if (isLogin && !String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
                 {
-                    this.Invoke(new EventHandler(delegate
+                    this.Invoke(new EventHandler(async delegate
                     {
                         File.WriteAllText(path, text);
                         editPosts[PostChoseHelper.POSTID.ToString()] =
                             new KeyValuePair<string, string>(PostChoseHelper.TITLE, text);
                         if (PostChoseHelper.POSTID >= 0)
                         {
-                            isSaved = postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, text).Result;
-                            WritePostEditPosById();
+                            isSaved = await postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, text);
+                            PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
                             if (!isSaved)
                                 FrmTips.ShowTipsError(this, "自动保存失败");
                             // this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " auto saved";
@@ -242,7 +242,7 @@ namespace Notepad
             originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
             textBox1.Text = originalContent;
             this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE;
-            this.textBox1.SelectionStart = ReadPostEditPosById(PostChoseHelper.POSTID);
+            this.textBox1.SelectionStart = PostEditHelper.ReadPostEditPosById(PostChoseHelper.POSTID);
             this.textBox1.Focus();
             this.textBox1.ScrollToCaret();
         }
@@ -278,7 +278,7 @@ namespace Notepad
             FrmTips.ShowTipsInfo(this, "新建博客: " + postId + ":" + post.title + 
                 "\n缓存路径为: " + cachePath);
             // 增加新的博客编辑位置
-            WritePostEditPosById();
+            PostEditHelper.WritePostEditPosById(0);
             BindEditPosts();
         }
 
@@ -310,7 +310,7 @@ namespace Notepad
                 if (PostChoseHelper.POSTID >= 0)
                 {
                     isSaved = postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text).Result;
-                    WritePostEditPosById();
+                    PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
                     if (isSaved)
                         this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
                 }
@@ -613,89 +613,13 @@ namespace Notepad
         }
 
         /*
-         * 初始化所有博客的编辑位置
-         */
-        private void InitAllPost()
-        {
-            List<PostInfo> posts = postServices.GetAllPost();
-            List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
-            foreach (PostInfo post in posts)
-            {
-                postEditInfo.Add(new PostEditInfo(post.Id, 0));
-            }
-            string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
-            string tmpPath = ConstantUtil.EDITPOSCACHE;
-            FileStream fs = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.Read);
-            fs.Close();
-            StreamWriter sw = new StreamWriter(tmpPath);
-            sw.Write(jsonPosts);
-            sw.Flush();
-            sw.Close();
-        }
-
-        /*
-         * 通过ID更新
-         */
-        private void WritePostEditPosById()
-        {
-            Dictionary<int, int> oldInfo = ReadPostEditInfo();
-
-            oldInfo[PostChoseHelper.POSTID] = this.textBox1.SelectionStart;
-
-            List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
-            foreach (var post in oldInfo)
-            {
-                postEditInfo.Add(new PostEditInfo(post.Key, post.Value));
-            }
-            string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
-            string tmpPath = ConstantUtil.EDITPOSCACHE;
-
-            StreamWriter sw = new StreamWriter(tmpPath, false);
-            sw.Write(jsonPosts);
-            sw.Flush();
-            sw.Close();
-        }
-
-        /*
-         * 读取所有博客编辑位置
-         */
-        private Dictionary<int, int> ReadPostEditInfo()
-        {
-            StreamReader sr = new StreamReader(ConstantUtil.EDITPOSCACHE);
-            string jsoninfo = sr.ReadToEnd();
-            sr.Close();
-            JArray jo = (JArray)JsonConvert.DeserializeObject(jsoninfo);
-            Dictionary<int, int> postEditInfos = new Dictionary<int, int>();
-            foreach (var postEditInfo in jo)
-            {
-                postEditInfos.Add(int.Parse(postEditInfo["Id"].ToString()), 
-                    int.Parse(postEditInfo["LastEditPos"].ToString()));
-            }
-            return postEditInfos;
-        }
-
-        /*
-         * 根据ID读取博客编辑位置
-         */
-        private int ReadPostEditPosById(int id)
-        {
-            var posts = ReadPostEditInfo();
-            if (!posts.ContainsKey(id))
-            {
-                posts.Add(PostChoseHelper.POSTID, 0);
-            }
-            return posts[id];
-        }
-
-        /*
          * 初始化编辑位置
          */
-        private void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
+        public void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            InitAllPost();
-            ReadPostEditInfo();
+            PostEditHelper.InitAllPost(postServices);
+            PostEditHelper.ReadPostEditInfo();
         }
-
         /*
          * 添加正在编辑的博客到List
          */
@@ -726,6 +650,7 @@ namespace Notepad
         {
             this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
             isSaved = false;
+            
             text = textBox1.Text;
         }
     }

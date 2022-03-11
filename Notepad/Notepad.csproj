@@ -195,8 +195,10 @@
     <Compile Include="Utils\ConstantUtil.cs" />
     <Compile Include="Utils\JsonUtil.cs" />
     <Compile Include="Utils\PostChoseHelper.cs" />
+    <Compile Include="Utils\PostEditHelper.cs" />
     <Compile Include="Utils\PostUtil.cs" />
     <Compile Include="Utils\SettingHelper.cs" />
+    <Compile Include="Utils\ThreadTaskHelper.cs" />
     <Compile Include="Utils\TokenUtil.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
