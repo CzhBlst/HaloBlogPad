@@ -223,13 +223,17 @@ namespace Notepad.Services
             post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
             request.AddJsonBody(jsonPost);
-            IRestResponse restResponse = await client.ExecuteAsync(request);
-            string statusCode = restResponse.StatusCode.ToString();
-            if (restResponse.IsSuccessful)
-            {
-                return true;
-            }
-            return false;
+            bool res = false;
+            client.ExecuteAsync(request, 
+                response =>
+                {
+                    if (response.IsSuccessful)
+                    {
+                        res = true;
+                    }
+                });
+
+            return res;
         }
 
     }
