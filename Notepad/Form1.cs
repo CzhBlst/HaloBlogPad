@@ -16,6 +16,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Notepad
@@ -131,7 +132,6 @@ namespace Notepad
                             PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
                             if (!isSaved)
                                 FrmTips.ShowTipsError(this, "自动保存失败");
-                            // this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " auto saved";
                         }
                     }));
                 } 
@@ -300,24 +300,38 @@ namespace Notepad
             }
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrWhiteSpace(path))
             {
-                File.WriteAllText(path, textBox1.Text);
-                editPosts[PostChoseHelper.POSTID.ToString()] = 
-                    new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
-                if (PostChoseHelper.POSTID >= 0)
-                {
-                    isSaved = postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text).Result;
-                    PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
-                    if (isSaved)
-                        this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
-                }
+                await SaveEditingPost();
             }
             else
             {
                 saveAsToolStripMenuItem_Click(sender, e);
+            }
+        }
+
+        public async Task SaveEditingPost()
+        {
+            if (!String.IsNullOrWhiteSpace(path))
+            {
+                File.WriteAllText(path, textBox1.Text);
+                editPosts[PostChoseHelper.POSTID.ToString()] =
+                    new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
+                if (PostChoseHelper.POSTID >= 0)
+                {
+                    // 异步方法会卡死在await，虽然成功调用了方法，但无法正确返回response
+                    // 非异步方法中调用异步方法会导致无法正确返回（可能是因为程序本身已经跑过去了？）
+                    isSaved = await postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
+                    PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
+                    if (isSaved)
+                        this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
+                }
+            } 
+            else
+            {
+                FrmTips.ShowTipsError(this, "未选择博客");
             }
         }
 
@@ -423,7 +437,7 @@ namespace Notepad
             }
         }
 
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        private async void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
 
             if (e.Control)
@@ -441,7 +455,8 @@ namespace Notepad
                         break;
                     case Keys.S:
                         e.SuppressKeyPress = true;
-                        saveToolStripMenuItem_Click(sender, e);
+                        await SaveEditingPost();
+                        // saveToolStripMenuItem_Click(sender, e);
                         break;
                     case Keys.Q:
                         if (this.TopMost == true)

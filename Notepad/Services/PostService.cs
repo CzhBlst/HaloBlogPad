@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using HZH_Controls.Forms;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Notepad.Bean;
 using Notepad.Utils;
@@ -204,12 +205,7 @@ namespace Notepad.Services
 
             IRestResponse restResponse = client.Execute(request);
 
-            string statusCode = restResponse.StatusCode.ToString();
-            if (restResponse.IsSuccessful)
-            {
-                return true;
-            }
-            return false;
+            return restResponse.IsSuccessful;
         }
 
         public async Task<bool> UpdatePostByIdAsync(int id, string title, string originalContent)
@@ -223,17 +219,8 @@ namespace Notepad.Services
             post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
             request.AddJsonBody(jsonPost);
-            bool res = false;
-            client.ExecuteAsync(request, 
-                response =>
-                {
-                    if (response.IsSuccessful)
-                    {
-                        res = true;
-                    }
-                });
-
-            return res;
+            var response = await client.ExecuteAsync(request);
+            return response.IsSuccessful;
         }
 
     }
