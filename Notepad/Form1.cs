@@ -31,7 +31,6 @@ namespace Notepad
         Boolean isSaved = true;
         String mdContent = "";
         String text = "";
-        int editPos = 0;
         PostService postServices;
         // id, title, content
         Dictionary<String, KeyValuePair<String, String>> editPosts;
@@ -50,7 +49,7 @@ namespace Notepad
             {
                 this.loginToolStripMenuItem.Text = "重新登录";
             }
-            HotKeyRegister();
+            FormHelper.HotKeyRegister(Handle);
             ChangePannelLayOut();
             SettingHelper.LoadSettings(SettingHelper.ReadSettings());
             editPosts = new Dictionary<string, KeyValuePair<string, string>>();
@@ -91,16 +90,6 @@ namespace Notepad
             ChangePannel();
             ChangePannelSize();
         }
-
-        /*
-         * 注册快捷键
-         */
-        private void HotKeyRegister()
-        {
-            HotKey.RegisterHotKey(Handle, 100, HotKey.KeyModifiers.Alt, Keys.Q);
-            HotKey.RegisterHotKey(Handle, 101, HotKey.KeyModifiers.Alt, Keys.V);
-        }
-
         /*
          * 启动线程，每隔十秒检测一次登录是否过期
          */
@@ -153,7 +142,9 @@ namespace Notepad
                 Thread.Sleep(12333);
             }
         }
-
+        /*
+         * 登录状态检查
+         */
         private async void checkLogin()
         {
             // 检查登录状态
@@ -245,13 +236,6 @@ namespace Notepad
             this.textBox1.SelectionStart = PostEditHelper.ReadPostEditPosById(PostChoseHelper.POSTID);
             this.textBox1.Focus();
             this.textBox1.ScrollToCaret();
-        }
-
-        private void setChosePost(int postid, string title,string filepath)
-        {
-            PostChoseHelper.POSTID = postid;
-            PostChoseHelper.TITLE = title;
-            PostChoseHelper.FILEPATH = filepath;
         }
 
         private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
@@ -417,8 +401,28 @@ namespace Notepad
             aboutForm.ShowDialog();
         }
 
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e) => Application.Exit();
+        // 选择博客的下拉框事件
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (editPosts.Count > 1 && PostChoseHelper.POSTID > 0)
+            {
+                saveToolStripMenuItem_Click(sender, e);
+            }
+
+            KeyValuePair<string, string> item = (KeyValuePair<string, string>)this.comboBox1.SelectedItem;
+            String filePath = ConstantUtil.CACHEPATH + item.Value;
+            PostUtil.setChosePost(int.Parse(item.Key), item.Value, filePath);
+            setTextBox();
+        }
+        // 博客文字发生变化时的事件
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
+            isSaved = false;
+
+            text = textBox1.Text;
+        }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -646,27 +650,6 @@ namespace Notepad
                 lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
             }
             this.comboBox1.DataSource = lstCom;
-        }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (editPosts.Count > 1 && PostChoseHelper.POSTID > 0)
-            {
-                saveToolStripMenuItem_Click(sender, e);
-            }
-
-            KeyValuePair<string, string> item = (KeyValuePair<string, string>)this.comboBox1.SelectedItem;
-            String filePath = ConstantUtil.CACHEPATH + item.Value;
-            setChosePost(int.Parse(item.Key), item.Value, filePath);
-            setTextBox();
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            this.Text = this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " unsaved";
-            isSaved = false;
-            
-            text = textBox1.Text;
         }
     }
 }

@@ -25,5 +25,12 @@ namespace Notepad.Utils
             sw.Flush();
             sw.Close();
         }
+
+        public static void setChosePost(int postid, string title, string filepath)
+        {
+            PostChoseHelper.POSTID = postid;
+            PostChoseHelper.TITLE = title;
+            PostChoseHelper.FILEPATH = filepath;
+        }
     }
 }

@@ -113,7 +113,7 @@ namespace Notepad.Services
             request.AddParameter("admin_token", token);
             IRestResponse restResponse = client.Execute(request);
 
-            string statusCode = restResponse.StatusCode.ToString();
+            // string statusCode = restResponse.StatusCode.ToString();
             if (restResponse.IsSuccessful)
             {
                 var json = restResponse.Content;
