@@ -195,6 +195,7 @@
     <Compile Include="Services\PostService.cs" />
     <Compile Include="Services\StaticStorageService.cs" />
     <Compile Include="Utils\AddBlogToEdits.cs" />
+    <Compile Include="Utils\AttachmentUtil.cs" />
     <Compile Include="Utils\ConstantUtil.cs" />
     <Compile Include="Utils\FormHelper.cs" />
     <Compile Include="Utils\JsonUtil.cs" />

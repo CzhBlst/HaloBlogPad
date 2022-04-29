@@ -64,6 +64,7 @@ namespace Notepad
             autoSaveTrd = new Thread(new ThreadStart(this.AutoSaveThreadTask));
             autoSaveTrd.IsBackground = true;
             autoSaveTrd.Start();
+            AttachmentUtil.DeleteOldCache();
         }
 
         /*
@@ -369,7 +370,6 @@ namespace Notepad
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.SelectedText = String.Empty;
 
-
         private void wordWrapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (wordWrapToolStripMenuItem.Checked == true)
@@ -461,7 +461,6 @@ namespace Notepad
                     case Keys.S:
                         e.SuppressKeyPress = true;
                         await SaveEditingPost();
-                        // saveToolStripMenuItem_Click(sender, e);
                         break;
                     case Keys.Q:
                         if (this.TopMost == true)
@@ -480,7 +479,6 @@ namespace Notepad
                     case Keys.I:
                         e.SuppressKeyPress = true;
                         string path = InsertImageFromClipboard();
-                        // int pos = this.textBox1.SelectionStart;
                         this.textBox1.SelectedText = path;
                         break;
                 }
@@ -495,18 +493,10 @@ namespace Notepad
         {
             if (Clipboard.ContainsImage())
             {
-                Image tmp = Clipboard.GetImage();
-                string filename = ConstantUtil.ATTACHMENTCACHE + DateTime.Now.ToString("yyyyMMddHHmmss") + ".jpg";
-                tmp.Save(filename);
                 attachmentService = new AttachmentService(token);
-                string path = attachmentService.UploadAttachment(filename);
-                if (path.Equals("error"))
-                {
-                    return "Upload Error";
-                }
-                string completePath = "![image](" + ConstantUtil.URL + path + ")";
-                return completePath;
-            } 
+                string path = AttachmentUtil.InsertImgFromClipBoard(attachmentService);
+                return path;
+            }
             else
             {
                 FrmTips.ShowTipsError(this, "剪切板没有图片");
@@ -614,12 +604,7 @@ namespace Notepad
                 mdContent = CommonMarkConverter.Convert(originalContent);
                 string url = ConstantUtil.URL + "/archives/" + PostChoseHelper.TITLE;
                 webBrowser1.DocumentText = mdContent;
-                // int pos = GetScrollPos(textBox1.Handle, 0);
                 int pos = GetScrollPos(textBox1.Handle, 1);
-                // int top = webBrowser1.Document.GetElementsByTagName("HTML")[0].ScrollTop;//滚动条垂直位置
-                // webBrowser1.Document.Window.ScrollTo(new Point(1517, pos));
-                // webBrowser1.AutoScrollOffset.Offset(1883, 722); 
-                // webBrowser1.
             }
             else
             {
