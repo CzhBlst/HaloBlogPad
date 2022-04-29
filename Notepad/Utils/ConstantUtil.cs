@@ -13,5 +13,6 @@ namespace Notepad.Utils
         public static string USERNAME = "";
         public static string PASSWORD = "";
         public static string EDITPOSCACHE = @"./EditPosition.json";
+        public static string ATTACHMENTCACHE = @"./cache/attachment/";
     }
 }

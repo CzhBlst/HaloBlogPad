@@ -190,8 +190,10 @@
     <Compile Include="HotKey.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\AttachmentService.cs" />
     <Compile Include="Services\AuthService.cs" />
     <Compile Include="Services\PostService.cs" />
+    <Compile Include="Services\StaticStorageService.cs" />
     <Compile Include="Utils\AddBlogToEdits.cs" />
     <Compile Include="Utils\ConstantUtil.cs" />
     <Compile Include="Utils\FormHelper.cs" />

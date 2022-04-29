@@ -32,6 +32,7 @@ namespace Notepad
         String mdContent = "";
         String text = "";
         PostService postServices;
+        AttachmentService attachmentService;
         // id, title, content
         Dictionary<String, KeyValuePair<String, String>> editPosts;
         private Thread loginCheckTrd; // 用来检测Token是否过期
@@ -476,7 +477,40 @@ namespace Notepad
                         e.SuppressKeyPress= true;
                         SearchToolStripMenuItem_Click(sender, e);
                         break;
+                    case Keys.I:
+                        e.SuppressKeyPress = true;
+                        string path = InsertImageFromClipboard();
+                        // int pos = this.textBox1.SelectionStart;
+                        this.textBox1.SelectedText = path;
+                        break;
                 }
+            }
+            
+        }
+        /// <summary>
+        /// 从剪切板获取图片插入到文本中
+        /// </summary>
+        /// <returns>返回MD格式引用</returns>
+        private string InsertImageFromClipboard()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                Image tmp = Clipboard.GetImage();
+                string filename = ConstantUtil.ATTACHMENTCACHE + DateTime.Now.ToString("yyyyMMddHHmmss") + ".jpg";
+                tmp.Save(filename);
+                attachmentService = new AttachmentService(token);
+                string path = attachmentService.UploadAttachment(filename);
+                if (path.Equals("error"))
+                {
+                    return "Upload Error";
+                }
+                string completePath = "![image](" + ConstantUtil.URL + path + ")";
+                return completePath;
+            } 
+            else
+            {
+                FrmTips.ShowTipsError(this, "剪切板没有图片");
+                return "";
             }
             
         }
