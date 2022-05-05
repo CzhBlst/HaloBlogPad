@@ -127,6 +127,29 @@ namespace Notepad.Services
             return post;
         }
 
+        public async Task<Post> SavePostToLocalByIdAsync(int postId)
+        {
+            Post post = null;
+            RestClient client = new RestClient(ConstantUtil.URL);
+            string uri = "/api/admin/posts/" + postId;
+            var request = new RestRequest(uri, Method.GET);
+            request.AddParameter("admin_token", token);
+            IRestResponse restResponse = await client.ExecuteAsync(request);
+            // string statusCode = restResponse.StatusCode.ToString();
+            if (restResponse.IsSuccessful)
+            {
+                var json = restResponse.Content;
+                JObject jo = (JObject)JsonConvert.DeserializeObject(json);
+                string id = jo["data"]["id"].ToString();
+                string title = jo["data"]["title"].ToString();
+                string originalContent = jo["data"]["originalContent"].ToString();
+                string mdContent = jo["data"]["formatContent"].ToString();
+                post = new Post(id, title, originalContent);
+            }
+            PostUtil.WriteToCache(post);
+            return post;
+        }
+
         /*
          * 添加新的博客
          * 返回值为新博客ID

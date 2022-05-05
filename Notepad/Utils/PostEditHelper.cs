@@ -16,22 +16,31 @@ namespace Notepad.Utils
         /*
         * 初始化所有博客的编辑位置
         */
-        public static void InitAllPost(PostService postServices)
+        public static bool InitAllPost(PostService postServices)
         {
-            List<PostInfo> posts = postServices.GetAllPost();
-            List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
-            foreach (PostInfo post in posts)
+            bool res = true;
+            try
             {
-                postEditInfo.Add(new PostEditInfo(post.Id, 0));
+                List<PostInfo> posts = postServices.GetAllPost();
+                List<PostEditInfo> postEditInfo = new List<PostEditInfo>();
+                foreach (PostInfo post in posts)
+                {
+                    postEditInfo.Add(new PostEditInfo(post.Id, 0));
+                }
+                string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
+                string tmpPath = ConstantUtil.EDITPOSCACHE;
+                FileStream fs = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.Read);
+                fs.Close();
+                StreamWriter sw = new StreamWriter(tmpPath);
+                sw.Write(jsonPosts);
+                sw.Flush();
+                sw.Close();
             }
-            string jsonPosts = JsonConvert.SerializeObject(postEditInfo);
-            string tmpPath = ConstantUtil.EDITPOSCACHE;
-            FileStream fs = new FileStream(tmpPath, FileMode.OpenOrCreate, FileAccess.Read);
-            fs.Close();
-            StreamWriter sw = new StreamWriter(tmpPath);
-            sw.Write(jsonPosts);
-            sw.Flush();
-            sw.Close();
+            catch (Exception)
+            {
+                res = false;
+            }
+            return res;
         }
 
         /*

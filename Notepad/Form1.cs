@@ -29,12 +29,14 @@ namespace Notepad
         Boolean isLogin = false;
         Boolean preViewMD = false;
         Boolean isSaved = true;
+        Boolean isWritingCache = false;
         String mdContent = "";
         String text = "";
         PostService postServices;
         AttachmentService attachmentService;
         // id, title, content
         Dictionary<String, KeyValuePair<String, String>> editPosts;
+
         private Thread loginCheckTrd; // 用来检测Token是否过期
         private Thread autoSaveTrd;
 
@@ -187,11 +189,20 @@ namespace Notepad
         private async void loginToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AuthService authService = new AuthService();
-            LoginInfo info = await authService.LoginAsync();
-            token = info.UsingToken;
-            if (token.Equals("error"))
+            LoginInfo info;
+            try
             {
-                FrmTips.ShowTipsError(this, "登录失败");
+                info = await authService.LoginAsync();
+                token = info.UsingToken;
+            }
+            catch (Exception)
+            {
+                // FrmTips.ShowTipsError(this, "登录失败，请检查Settings是否配置");
+            }
+            // token = info.UsingToken;
+            if (token == null || token.Equals("error"))
+            {
+                FrmTips.ShowTipsError(this, "登录失败，请检查Settings!");
             }
             else
             {
@@ -214,12 +225,11 @@ namespace Notepad
                 {
                     editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
                     BindEditPosts();
-                } 
+                }
                 catch (ArgumentException e1)
                 {
                     Console.WriteLine(e1.StackTrace);
                 }
-                
             }
             else
             {
@@ -655,7 +665,17 @@ namespace Notepad
          */
         public void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            PostEditHelper.InitAllPost(postServices);
+            if (postServices == null)
+            {
+                FrmTips.ShowTipsError(this, "未登录");
+                return;
+            }
+            bool success = PostEditHelper.InitAllPost(postServices);
+            if (!success)
+            {
+                FrmTips.ShowTipsError(this, "初始化编辑位置失败，请检查初始化步骤");
+                return;
+            }
             PostEditHelper.ReadPostEditInfo();
         }
         /*
@@ -669,6 +689,28 @@ namespace Notepad
                 lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
             }
             this.comboBox1.DataSource = lstCom;
+        }
+
+        private async void CacheAllBlogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (isWritingCache)
+            {
+                FrmTips.ShowTipsWarning(this, "正在写入中，请耐心等待");
+                return;
+            }
+            isWritingCache = true;
+            if (!isLogin || postServices == null)
+            {
+                FrmTips.ShowTipsError(this, "未登录");
+                return;
+            }
+            List<PostInfo> posts = postServices.GetAllPost();
+            foreach (PostInfo post in posts)
+            {
+                await postServices.SavePostToLocalByIdAsync(post.Id);
+            }
+            isWritingCache = false;
+            FrmTips.ShowTipsInfo(this, "全部写入完成");
         }
     }
 }

@@ -64,8 +64,10 @@ namespace Notepad
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
             this.loginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getBlogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.initEditPostToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OperateBlogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.初始化编辑位置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.拉取所有博客到本地ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.添加博客ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.textBox1 = new System.Windows.Forms.RichTextBox();
@@ -323,8 +325,7 @@ namespace Notepad
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loginToolStripMenuItem,
             this.getBlogsToolStripMenuItem,
-            this.addBlogToolStripMenuItem,
-            this.initEditPostToolStripMenuItem});
+            this.OperateBlogToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 25);
             this.menuStrip2.Name = "menuStrip2";
             this.menuStrip2.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
@@ -346,19 +347,36 @@ namespace Notepad
             this.getBlogsToolStripMenuItem.Text = "GetBlogs";
             this.getBlogsToolStripMenuItem.Click += new System.EventHandler(this.getBlogsToolStripMenuItem_Click);
             // 
-            // addBlogToolStripMenuItem
+            // OperateBlogToolStripMenuItem
             // 
-            this.addBlogToolStripMenuItem.Name = "addBlogToolStripMenuItem";
-            this.addBlogToolStripMenuItem.Size = new System.Drawing.Size(71, 21);
-            this.addBlogToolStripMenuItem.Text = "AddBlog";
-            this.addBlogToolStripMenuItem.Click += new System.EventHandler(this.addNewPostToolStripMenuItem_Click);
+            this.OperateBlogToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.初始化编辑位置ToolStripMenuItem,
+            this.拉取所有博客到本地ToolStripMenuItem,
+            this.添加博客ToolStripMenuItem});
+            this.OperateBlogToolStripMenuItem.Name = "OperateBlogToolStripMenuItem";
+            this.OperateBlogToolStripMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.OperateBlogToolStripMenuItem.Text = "博客操作";
             // 
-            // initEditPostToolStripMenuItem
+            // 初始化编辑位置ToolStripMenuItem
             // 
-            this.initEditPostToolStripMenuItem.Name = "initEditPostToolStripMenuItem";
-            this.initEditPostToolStripMenuItem.Size = new System.Drawing.Size(106, 21);
-            this.initEditPostToolStripMenuItem.Text = "InitEditPosition";
-            this.initEditPostToolStripMenuItem.Click += new System.EventHandler(this.initEditPostToolStripMenuItem_Click);
+            this.初始化编辑位置ToolStripMenuItem.Name = "初始化编辑位置ToolStripMenuItem";
+            this.初始化编辑位置ToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.初始化编辑位置ToolStripMenuItem.Text = "初始化所有博客编辑位置";
+            this.初始化编辑位置ToolStripMenuItem.Click += new System.EventHandler(this.initEditPostToolStripMenuItem_Click);
+            // 
+            // 拉取所有博客到本地ToolStripMenuItem
+            // 
+            this.拉取所有博客到本地ToolStripMenuItem.Name = "拉取所有博客到本地ToolStripMenuItem";
+            this.拉取所有博客到本地ToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.拉取所有博客到本地ToolStripMenuItem.Text = "拉取所有博客到本地";
+            this.拉取所有博客到本地ToolStripMenuItem.Click += new System.EventHandler(this.CacheAllBlogToolStripMenuItem_Click);
+            // 
+            // 添加博客ToolStripMenuItem
+            // 
+            this.添加博客ToolStripMenuItem.Name = "添加博客ToolStripMenuItem";
+            this.添加博客ToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.添加博客ToolStripMenuItem.Text = "添加博客";
+            this.添加博客ToolStripMenuItem.Click += new System.EventHandler(this.addNewPostToolStripMenuItem_Click);
             // 
             // panel1
             // 
@@ -391,7 +409,7 @@ namespace Notepad
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(428, 27);
+            this.comboBox1.Location = new System.Drawing.Point(516, 25);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(144, 20);
             this.comboBox1.TabIndex = 7;
@@ -483,16 +501,18 @@ namespace Notepad
         private System.Windows.Forms.MenuStrip menuStrip2;
         private System.Windows.Forms.ToolStripMenuItem loginToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem getBlogsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addBlogToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem initEditPostToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem OperateBlogToolStripMenuItem;
         public System.Windows.Forms.RichTextBox textBox1;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.CheckBox AutoSaveBox;
         private System.Windows.Forms.CheckBox AutoLogin;
+        private System.Windows.Forms.ToolStripMenuItem 初始化编辑位置ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 拉取所有博客到本地ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 添加博客ToolStripMenuItem;
     }
 }
 
