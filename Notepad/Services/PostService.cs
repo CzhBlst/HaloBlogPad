@@ -157,7 +157,7 @@ namespace Notepad.Services
         public int AddNewPost(string title)
         {
             RestClient client = new RestClient(ConstantUtil.URL);
-            string cachePath = ConstantUtil.CACHEPATH + title;
+            string cachePath = ConstantUtil.BLOGCACHE + title;
             StreamReader sr = new StreamReader(cachePath);
             string originalContent = sr.ReadToEnd();
             sr.Close();

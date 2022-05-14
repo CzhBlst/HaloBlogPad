@@ -26,10 +26,14 @@ namespace Notepad
         String path = String.Empty;
         String token;
         int currentPost;
+        int loginInterval;
+        int saveInterval;
         Boolean isLogin = false;
         Boolean preViewMD = false;
         Boolean isSaved = true;
         Boolean isWritingCache = false;
+        Boolean autoSave = false;
+        Boolean autoLogin = false;
         String mdContent = "";
         String text = "";
         PostService postServices;
@@ -54,7 +58,14 @@ namespace Notepad
             }
             FormHelper.HotKeyRegister(Handle);
             ChangePannelLayOut();
-            SettingHelper.LoadSettings(SettingHelper.ReadSettings());
+
+            BlogSettingHelper.LoadSettings(BlogSettingHelper.ReadSettings());
+            CommonSettingHelper.LoadSettings(CommonSettingHelper.ReadSettings());
+            autoSave = ConstantUtil.AUTOSAVE;
+            autoLogin = ConstantUtil.AUTOLOGIN;
+            loginInterval = ConstantUtil.LOGINCHECKINTERVAL;
+            saveInterval = ConstantUtil.SAVEINTERVAL;
+
             editPosts = new Dictionary<string, KeyValuePair<string, string>>();
             // textBox1.Font.Size = 12;
             // 修改默认字体大小
@@ -88,6 +99,10 @@ namespace Notepad
             RegistryKey reg = Registry.CurrentUser.CreateSubKey("SoftWare\\BlogPad");
             this.Location = new Point(Convert.ToInt32(reg.GetValue("MainFormX")), 
                 Convert.ToInt32(reg.GetValue("MainFormY")));
+            if (Location.X < 0 || Location.Y < 0)
+            {
+                this.Location = new Point(200, 200);
+            }
             this.Size = new System.Drawing.Size(650, 550);
             this.MinimumSize = new System.Drawing.Size(600, 500);
             // comboBox1.Left = this.Width - 180;
@@ -102,7 +117,7 @@ namespace Notepad
             while (true)
             {
                 checkLogin();
-                Thread.Sleep(10000);
+                Thread.Sleep(loginInterval);
             }
         }
         /*
@@ -112,7 +127,7 @@ namespace Notepad
         {
             while (true)
             {
-                if (isLogin && !String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
+                if (isLogin && !String.IsNullOrWhiteSpace(path) && autoSave)
                 {
                     this.Invoke(new EventHandler(async delegate
                     {
@@ -125,10 +140,12 @@ namespace Notepad
                             PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
                             if (!isSaved)
                                 FrmTips.ShowTipsError(this, "自动保存失败");
+                            else
+                                this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
                         }
                     }));
                 } 
-                else if (!isLogin && AutoSaveBox.Checked)
+                else if (!isLogin && autoSave)
                 {
                     this.Invoke(new EventHandler(delegate
                     {
@@ -136,14 +153,14 @@ namespace Notepad
                     }));
                     
                 }
-                else if (!String.IsNullOrWhiteSpace(path) && AutoSaveBox.Checked)
+                else if (!String.IsNullOrWhiteSpace(path) && autoSave)
                 {
                     this.Invoke(new EventHandler(delegate
                     {
                         FrmTips.ShowTipsError(this, "未登录或Token已过期");
                     }));
                 }
-                Thread.Sleep(12333);
+                Thread.Sleep(saveInterval);
             }
         }
         /*
@@ -158,7 +175,7 @@ namespace Notepad
             {
                 isLogin = false;
                 this.loginToolStripMenuItem.Text = "Login";
-                if (AutoLogin.Checked)
+                if (autoLogin)
                 {
                     LoginInfo info = await authService.LoginAsync();
                     token = info.UsingToken;
@@ -216,6 +233,7 @@ namespace Notepad
         private void getBlogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form postsForm = new BlogChoseForm(token);
+            postsForm.StartPosition = FormStartPosition.CenterParent;
             postsForm.ShowDialog();
             if (!AddBlogToEdits.TITLE.Equals(""))
             {
@@ -262,7 +280,7 @@ namespace Notepad
                 return;
             }
             Post post = new Post(test[0], test[1]);
-            string cachePath = ConstantUtil.CACHEPATH + post.title;
+            string cachePath = ConstantUtil.BLOGCACHE + post.title;
             FileStream fs = new FileStream(cachePath, FileMode.OpenOrCreate, FileAccess.Read);
             fs.Close();
             int postId = postServices.AddNewPost(post.title);
@@ -346,6 +364,7 @@ namespace Notepad
         private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SearchForm f2 = new SearchForm(this);
+            f2.StartPosition = FormStartPosition.CenterParent;
             f2.Show();
         }
 
@@ -422,7 +441,7 @@ namespace Notepad
             }
 
             KeyValuePair<string, string> item = (KeyValuePair<string, string>)this.comboBox1.SelectedItem;
-            String filePath = ConstantUtil.CACHEPATH + item.Value;
+            String filePath = ConstantUtil.BLOGCACHE + item.Value;
             PostUtil.setChosePost(int.Parse(item.Key), item.Value, filePath);
             setTextBox();
         }
@@ -633,31 +652,41 @@ namespace Notepad
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Setting setting = SettingHelper.ReadSettings();
+            Setting setting = BlogSettingHelper.ReadSettings();
             FrmInputs frm = new FrmInputs("博客设置",
-                new string[] { "博客地址", "缓存路径", "账号(邮箱)", "密码" },
+                new string[] { "博客地址", "账号(邮箱)", "密码" },
                 defaultValues: new Dictionary<string, string> { { "博客地址", setting.Url },
-                    { "缓存路径", setting.CachePath },
                     { "账号(邮箱)", setting.Username },
                     { "密码", setting.Password } }
                 );
             frm.ShowDialog(this);
             string[] test = frm.Values;
             setting.Url = test[0];
-            setting.CachePath = test[1];
-            setting.Username = test[2];
-            setting.Password = test[3];
+            setting.Username = test[1];
+            setting.Password = test[2];
             if (setting.Url == null ||
-                setting.CachePath == null ||
                 setting.Username == null ||
                 setting.Password == null)
             {
                 return;
             }
-            SettingHelper.WriteSettings(setting);
-            SettingHelper.LoadSettings(setting);
+            BlogSettingHelper.WriteSettings(setting);
+            BlogSettingHelper.LoadSettings(setting);
             PostChoseHelper.POSTID = currentPost;
             this.path = PostChoseHelper.FILEPATH;
+        }
+        private void CommonSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SettingForm frm = new SettingForm();
+            frm.StartPosition = FormStartPosition.CenterParent;
+            frm.ShowDialog(this);
+            PostChoseHelper.POSTID = currentPost;
+            this.path = PostChoseHelper.FILEPATH;
+            CommonSettingHelper.LoadSettings(CommonSettingHelper.ReadSettings());
+            autoSave = ConstantUtil.AUTOSAVE;
+            autoLogin = ConstantUtil.AUTOLOGIN;
+            loginInterval = ConstantUtil.LOGINCHECKINTERVAL;
+            saveInterval = ConstantUtil.SAVEINTERVAL;
         }
 
         /*

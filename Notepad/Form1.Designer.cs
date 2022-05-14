@@ -68,12 +68,11 @@ namespace Notepad
             this.初始化编辑位置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.拉取所有博客到本地ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.添加博客ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.textBox1 = new System.Windows.Forms.RichTextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.AutoSaveBox = new System.Windows.Forms.CheckBox();
-            this.AutoLogin = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -293,7 +292,7 @@ namespace Notepad
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(66, 21);
             this.settingsToolStripMenuItem.Text = "Settings";
-            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            this.settingsToolStripMenuItem.Click += new System.EventHandler(this.CommonSettingsToolStripMenuItem_Click);
             // 
             // saveFileDialog1
             // 
@@ -325,7 +324,8 @@ namespace Notepad
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.loginToolStripMenuItem,
             this.getBlogsToolStripMenuItem,
-            this.OperateBlogToolStripMenuItem});
+            this.OperateBlogToolStripMenuItem,
+            this.toolStripMenuItem1});
             this.menuStrip2.Location = new System.Drawing.Point(0, 25);
             this.menuStrip2.Name = "menuStrip2";
             this.menuStrip2.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
@@ -378,6 +378,13 @@ namespace Notepad
             this.添加博客ToolStripMenuItem.Text = "添加博客";
             this.添加博客ToolStripMenuItem.Click += new System.EventHandler(this.addNewPostToolStripMenuItem_Click);
             // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(68, 21);
+            this.toolStripMenuItem1.Text = "博客配置";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.webBrowser1);
@@ -389,7 +396,7 @@ namespace Notepad
             // 
             // webBrowser1
             // 
-            this.webBrowser1.Location = new System.Drawing.Point(576, 3);
+            this.webBrowser1.Location = new System.Drawing.Point(575, 0);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(540, 1096);
@@ -416,36 +423,12 @@ namespace Notepad
             this.comboBox1.TabStop = false;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // AutoSaveBox
-            // 
-            this.AutoSaveBox.AutoSize = true;
-            this.AutoSaveBox.Location = new System.Drawing.Point(323, 31);
-            this.AutoSaveBox.Name = "AutoSaveBox";
-            this.AutoSaveBox.Size = new System.Drawing.Size(72, 16);
-            this.AutoSaveBox.TabIndex = 8;
-            this.AutoSaveBox.TabStop = false;
-            this.AutoSaveBox.Text = "AutoSave";
-            this.AutoSaveBox.UseVisualStyleBackColor = true;
-            // 
-            // AutoLogin
-            // 
-            this.AutoLogin.AutoSize = true;
-            this.AutoLogin.Location = new System.Drawing.Point(323, 6);
-            this.AutoLogin.Name = "AutoLogin";
-            this.AutoLogin.Size = new System.Drawing.Size(78, 16);
-            this.AutoLogin.TabIndex = 9;
-            this.AutoLogin.TabStop = false;
-            this.AutoLogin.Text = "AutoLogin";
-            this.AutoLogin.UseVisualStyleBackColor = true;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1129, 611);
-            this.Controls.Add(this.AutoLogin);
-            this.Controls.Add(this.AutoSaveBox);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip2);
@@ -508,11 +491,10 @@ namespace Notepad
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
-        private System.Windows.Forms.CheckBox AutoSaveBox;
-        private System.Windows.Forms.CheckBox AutoLogin;
         private System.Windows.Forms.ToolStripMenuItem 初始化编辑位置ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 拉取所有博客到本地ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 添加博客ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
     }
 }
 

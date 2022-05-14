@@ -16,6 +16,10 @@ namespace Notepad.Utils
         {
             System.Drawing.Image tmp = Clipboard.GetImage();
             string filename = ConstantUtil.ATTACHMENTCACHE + DateTime.Now.ToString("yyyyMMddHHmmss") + ".jpg";
+            if (!Directory.Exists(ConstantUtil.ATTACHMENTCACHE))
+            {
+                Directory.CreateDirectory(ConstantUtil.ATTACHMENTCACHE);
+            }
             tmp.Save(filename);
             string path = attachmentService.UploadAttachment(filename);
             if (path.Equals("error"))

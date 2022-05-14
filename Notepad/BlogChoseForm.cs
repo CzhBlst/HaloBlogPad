@@ -37,7 +37,7 @@ namespace NotePad
             PostInfo test = (PostInfo)this.ucDataGridView1.SelectRow.DataSource;
             AddBlogToEdits.POSTID = test.Id;
             AddBlogToEdits.TITLE = test.Title;
-            AddBlogToEdits.FILEPATH = ConstantUtil.CACHEPATH + test.Title;
+            AddBlogToEdits.FILEPATH = ConstantUtil.BLOGCACHE + test.Title;
             // Console.WriteLine(test.ToString());
             this.Close();
         }

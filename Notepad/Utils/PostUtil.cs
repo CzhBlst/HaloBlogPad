@@ -17,7 +17,11 @@ namespace Notepad.Utils
          */
         public static void WriteToCache(Post post)
         {
-            string cachePath = ConstantUtil.CACHEPATH + post.title;
+            string cachePath = ConstantUtil.BLOGCACHE + post.title;
+            if (!Directory.Exists(ConstantUtil.BLOGCACHE))
+            {
+                Directory.CreateDirectory(ConstantUtil.BLOGCACHE);
+            }
             FileStream fs = new FileStream(cachePath, FileMode.OpenOrCreate, FileAccess.Read);
             fs.Close();
             StreamWriter sw = new StreamWriter(cachePath);
