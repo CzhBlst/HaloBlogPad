@@ -114,7 +114,7 @@ namespace Notepad
          */
         private void LoginCheckThreadTask()
         {
-            while (true)
+            while (autoLogin)
             {
                 checkLogin();
                 Thread.Sleep(loginInterval);
@@ -125,7 +125,7 @@ namespace Notepad
          */
         private void AutoSaveThreadTask()
         {
-            while (true)
+            while (autoSave)
             {
                 if (isLogin && !String.IsNullOrWhiteSpace(path) && autoSave)
                 {
@@ -675,6 +675,7 @@ namespace Notepad
             PostChoseHelper.POSTID = currentPost;
             this.path = PostChoseHelper.FILEPATH;
         }
+
         private void CommonSettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SettingForm frm = new SettingForm();
@@ -687,6 +688,18 @@ namespace Notepad
             autoLogin = ConstantUtil.AUTOLOGIN;
             loginInterval = ConstantUtil.LOGINCHECKINTERVAL;
             saveInterval = ConstantUtil.SAVEINTERVAL;
+            if (!loginCheckTrd.IsAlive)
+            {
+                loginCheckTrd = new Thread(new ThreadStart(this.LoginCheckThreadTask));
+                loginCheckTrd.IsBackground = true;
+                loginCheckTrd.Start();
+            }
+            if (!autoSaveTrd.IsAlive)
+            {
+                autoSaveTrd = new Thread(new ThreadStart(this.AutoSaveThreadTask));
+                autoSaveTrd.IsBackground = true;
+                autoSaveTrd.Start();
+            }
         }
 
         /*
