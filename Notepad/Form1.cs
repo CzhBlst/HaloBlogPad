@@ -112,11 +112,47 @@ namespace Notepad
         /*
          * 启动线程，每隔十秒检测一次登录是否过期
          */
-        private void LoginCheckThreadTask()
+        private async void LoginCheckThreadTask()
         {
             while (autoLogin)
             {
-                checkLogin();
+                AuthService authService = new AuthService();
+                LoginInfo lastToken = authService.getLastLoginToken();
+                if (lastToken == null || !authService.checkToken(lastToken))
+                {
+                    this.Invoke(new EventHandler(async delegate
+                    {
+                        isLogin = false;
+                        this.loginToolStripMenuItem.Text = "Login";
+                        if (autoLogin)
+                        {
+                            LoginInfo info = await authService.LoginAsync();
+                            token = info.UsingToken;
+                            if (token.Equals("error"))
+                            {
+                                FrmTips.ShowTipsError(this, "自动登录失败");
+                            }
+                            else
+                            {
+                                lastToken = info;
+                                FrmTips.ShowTipsInfo(this, "登录过期，已自动重新登录");
+                                this.loginToolStripMenuItem.Text = "重新登录";
+                                postServices = new PostService(token);
+                                isLogin = true;
+                            }
+                        }
+                    }));
+                }
+                else
+                {
+                    this.Invoke(new EventHandler(delegate
+                    {
+                        token = lastToken.UsingToken;
+                        postServices = new PostService(token);
+                        isLogin = true;
+                        this.loginToolStripMenuItem.Text = "重新登录";
+                    }));
+                }
                 Thread.Sleep(loginInterval);
             }
         }
@@ -157,7 +193,7 @@ namespace Notepad
                 {
                     this.Invoke(new EventHandler(delegate
                     {
-                        FrmTips.ShowTipsError(this, "未登录或Token已过期");
+                        FrmTips.ShowTipsError(this, "未选择博客");
                     }));
                 }
                 Thread.Sleep(saveInterval);
@@ -169,38 +205,7 @@ namespace Notepad
         private async void checkLogin()
         {
             // 检查登录状态
-            AuthService authService = new AuthService();
-            LoginInfo lastToken = authService.getLastLoginToken();
-            if (lastToken == null || !authService.checkToken(lastToken))
-            {
-                isLogin = false;
-                this.loginToolStripMenuItem.Text = "Login";
-                if (autoLogin)
-                {
-                    LoginInfo info = await authService.LoginAsync();
-                    token = info.UsingToken;
-                    if (token.Equals("error"))
-                    {
-                        FrmTips.ShowTipsError(this, "自动登录失败");
-                    }
-                    else
-                    {
-                        lastToken = info;
-                        FrmTips.ShowTipsInfo(this, "登录过期，已自动重新登录");
-                        this.loginToolStripMenuItem.Text = "重新登录";
-                        postServices = new PostService(token);
-                        isLogin = true;
-                    }
-                }
-                // 未登陆过或是token已过期
-            }
-            else
-            {
-                token = lastToken.UsingToken;
-                postServices = new PostService(token);
-                isLogin = true;
-                this.loginToolStripMenuItem.Text = "重新登录";
-            }
+            
         }
 
         private async void loginToolStripMenuItem_Click(object sender, EventArgs e)
@@ -232,6 +237,11 @@ namespace Notepad
 
         private void getBlogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!isLogin || token == null || token == " " || postServices == null)
+            {
+                FrmTips.ShowTipsError(this, "未登录");
+                return;
+            }
             Form postsForm = new BlogChoseForm(token);
             postsForm.StartPosition = FormStartPosition.CenterParent;
             postsForm.ShowDialog();
@@ -270,6 +280,11 @@ namespace Notepad
 
         private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!isLogin || token == null || token == " " || postServices == null)
+            {
+                FrmTips.ShowTipsError(this, "未登录");
+                return;
+            }
             FrmInputs frm = new FrmInputs("新建博客",
                 new string[] { "Title", "内容", "密码" },
                 mastInputs: new List<string>() { "Title" });

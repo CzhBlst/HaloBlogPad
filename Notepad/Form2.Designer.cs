@@ -63,8 +63,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(260, 67);
             this.label1.TabIndex = 3;
-            this.label1.Text = "This is my first simple notepad app in C# created for educational purposes.      " +
-    "  Version forked by Paulo Henrique.";
+            this.label1.Text = "感谢Paulo Henrique的editor与Halo Blog";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // Form2
