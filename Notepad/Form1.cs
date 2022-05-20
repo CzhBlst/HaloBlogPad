@@ -243,7 +243,7 @@ namespace Notepad
                 return;
             }
             Form postsForm = new BlogChoseForm(token);
-            postsForm.StartPosition = FormStartPosition.CenterParent;
+            postsForm.StartPosition = FormStartPosition.CenterScreen;
             postsForm.ShowDialog();
             if (!AddBlogToEdits.TITLE.Equals(""))
             {
