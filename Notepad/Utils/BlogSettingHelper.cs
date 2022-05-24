@@ -23,7 +23,7 @@ namespace Notepad.Utils
         */
         public static Setting ReadSettings()
         {
-            PostChoseHelper.POSTID = -1; // 重置博客，防止将settings提交到博客
+            // PostChoseHelper.POSTID = -1; // 重置博客，防止将settings提交到博客
             string settingsFile = "./config/BlogSettings.json";
             StreamReader sr = new StreamReader(settingsFile);
             string settingsText = sr.ReadToEnd();

@@ -202,10 +202,19 @@ namespace Notepad
         /*
          * 登录状态检查
          */
-        private async void checkLogin()
+        private void checkLogin()
         {
             // 检查登录状态
-            
+            AuthService authService = new AuthService();
+            LoginInfo lastToken = authService.getLastLoginToken();
+            if (lastToken == null || !authService.checkToken(lastToken))
+            {
+                isLogin = false;
+            } 
+            else
+            {
+                isLogin = true;
+            }
         }
 
         private async void loginToolStripMenuItem_Click(object sender, EventArgs e)
@@ -687,8 +696,6 @@ namespace Notepad
             }
             BlogSettingHelper.WriteSettings(setting);
             BlogSettingHelper.LoadSettings(setting);
-            PostChoseHelper.POSTID = currentPost;
-            this.path = PostChoseHelper.FILEPATH;
         }
 
         private void CommonSettingsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -696,8 +703,6 @@ namespace Notepad
             SettingForm frm = new SettingForm();
             frm.StartPosition = FormStartPosition.CenterParent;
             frm.ShowDialog(this);
-            PostChoseHelper.POSTID = currentPost;
-            this.path = PostChoseHelper.FILEPATH;
             CommonSettingHelper.LoadSettings(CommonSettingHelper.ReadSettings());
             autoSave = ConstantUtil.AUTOSAVE;
             autoLogin = ConstantUtil.AUTOLOGIN;
