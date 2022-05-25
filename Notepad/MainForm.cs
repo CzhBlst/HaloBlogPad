@@ -1,10 +1,6 @@
 ﻿using CommonMark;
-using HZH_Controls.Controls;
 using HZH_Controls.Forms;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Notepad.Bean;
 using Notepad.Services;
 using Notepad.Utils;
@@ -21,8 +17,9 @@ using System.Windows.Forms;
 
 namespace Notepad
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
+        #region 变量定义
         String path = String.Empty;
         String token;
         int currentPost;
@@ -38,17 +35,23 @@ namespace Notepad
         String text = "";
         PostService postServices;
         AttachmentService attachmentService;
-        // id, title, content
-        Dictionary<String, KeyValuePair<String, String>> editPosts;
+        Dictionary<String, KeyValuePair<String, String>> editPosts; // id, title, content
+        Thread loginCheckTrd;
+        Thread autoSaveTrd;
+        [DllImport("user32.dll", EntryPoint = "GetScrollPos")]
+        public static extern int GetScrollPos(
+            IntPtr hwnd,
+            int nBar
+        );
+        #endregion
 
-        private Thread loginCheckTrd; // 用来检测Token是否过期
-        private Thread autoSaveTrd;
-
-        public Form1() => InitializeComponent();
-
-        /*
-         * 窗口加载时注册热键，并更改各个组件位置
-         */
+        #region 窗体加载、退出事件与方法
+        public MainForm() => InitializeComponent();
+        /// <summary>
+        /// 窗体加载时事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_Load_1(object sender, EventArgs e)
         {
             checkLogin();
@@ -79,10 +82,9 @@ namespace Notepad
             autoSaveTrd.Start();
             AttachmentUtil.DeleteOldCache();
         }
-
-        /*
-         * 主窗体退出时记录位置
-         */
+        /// <summary>
+        /// 窗体关闭后事件
+        /// </summary>
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             RegistryKey reg1 = Registry.CurrentUser;
@@ -90,14 +92,39 @@ namespace Notepad
             reg2.SetValue("MainFormX", this.Location.X);
             reg2.SetValue("MainFormY", this.Location.Y);
         }
+        /// <summary>
+        /// 窗体关闭时事件
+        /// </summary>
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                exitPrompt();
 
-        /*
-         * 修改界面位置
-         */
+                if (DialogResult == DialogResult.Yes)
+                {
+                    saveToolStripMenuItem_Click(sender, e);
+                }
+                else if (DialogResult == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
+        /// <summary>
+        /// 窗体尺寸更改事件
+        /// </summary>
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            ChangePannelSize();
+        }
+        /// <summary>
+        /// 窗口加载时调整窗口位置
+        /// </summary>
         private void ChangePannelLayOut()
         {
             RegistryKey reg = Registry.CurrentUser.CreateSubKey("SoftWare\\BlogPad");
-            this.Location = new Point(Convert.ToInt32(reg.GetValue("MainFormX")), 
+            this.Location = new Point(Convert.ToInt32(reg.GetValue("MainFormX")),
                 Convert.ToInt32(reg.GetValue("MainFormY")));
             if (Location.X < 0 || Location.Y < 0)
             {
@@ -109,10 +136,173 @@ namespace Notepad
             ChangePannel();
             ChangePannelSize();
         }
+        /// <summary>
+        /// 退出时事件
+        /// </summary>
+        private void exitPrompt()
+        {
+            if (!isSaved)
+            {
+                DialogResult = MessageBox.Show("Do you want to save current file?",
+                "Notepad",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            }
+        }
+        /// <summary>
+        /// 窗体隐藏
+        /// </summary>
+        public void HideForm()
+        {
+            if (this.Visible == true)
+                this.Visible = false;
+            else
+                this.Visible = true;
+        }
+        /// <summary>
+        /// 更改窗口尺寸时调整控件位置
+        /// </summary>
+        private void ChangePannelSize()
+        {
+            panel1.Width = this.Width - 20;
+            panel1.Height = this.Height - 90;
+            comboBox1.Left = this.Width - 180;
+            if (preViewMD)
+            {
+                // webBrowser1.DocumentText = mdContent;
+                webBrowser1.Left = 5;
+                webBrowser1.Width = panel1.Width - 10;
+                webBrowser1.Top = 0;
+                webBrowser1.Height = panel1.Height - 10;
+            }
+            else
+            {
+                textBox1.Left = 5;
+                textBox1.Width = panel1.Width - 10;
+                textBox1.Top = 0;
+                textBox1.Height = panel1.Height - 10;
+            }
+        }
+        /// <summary>
+        /// 切换文本和MarkDown预览模式
+        /// </summary>
+        private void ChangePannel()
+        {
+            if (preViewMD)
+            {
+                textBox1.Hide();
+                webBrowser1.Show();
+                string originalContent = textBox1.Text;
+                mdContent = CommonMarkConverter.Convert(originalContent);
+                string url = ConstantUtil.URL + "/archives/" + PostChoseHelper.TITLE;
+                webBrowser1.DocumentText = mdContent;
+                int pos = GetScrollPos(textBox1.Handle, 1);
+            }
+            else
+            {
+                webBrowser1.Hide();
+                textBox1.Show();
+                textBox1.Focus();
+            }
+            ChangePannelSize();
+        }
+
+        #endregion 
+
+        #region 记事本菜单事件
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(textBox1.Text))
+            {
+                exitPrompt();
+
+                if (DialogResult == DialogResult.Yes)
+                {
+                    saveToolStripMenuItem_Click(sender, e);
+                    textBox1.Text = String.Empty;
+                    path = String.Empty; ;
+                }
+                else if (DialogResult == DialogResult.No)
+                {
+                    textBox1.Text = String.Empty; ;
+                    path = String.Empty; ;
+                }
+
+            }
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.SelectAll();
+
+        private void cutToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.Cut();
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.Copy();
+
+        private void pasteToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.Paste();
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.SelectedText = String.Empty;
+
+        private void wordWrapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (wordWrapToolStripMenuItem.Checked == true)
+            {
+                textBox1.WordWrap = false;
+                textBox1.ScrollBars = RichTextBoxScrollBars.Both;
+                wordWrapToolStripMenuItem.Checked = false;
+            }
+            else
+            {
+                textBox1.WordWrap = true;
+                textBox1.ScrollBars = RichTextBoxScrollBars.Vertical;
+                wordWrapToolStripMenuItem.Checked = true;
+            }
+        }
+
+        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (fontDialog1.ShowDialog() == DialogResult.OK)
+            {
+                textBox1.Font = textBox1.Font = new Font(fontDialog1.Font, fontDialog1.Font.Style);
+
+                textBox1.ForeColor = fontDialog1.Color;
+            }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form aboutForm = new AboutForm();
+            aboutForm.ShowDialog();
+        }
+
+        private void blackToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            textBox1.ForeColor = Color.White;
+            textBox1.BackColor = Color.Black;
+            this.BackColor = Color.Gray;
+        }
+
+        private void grayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            textBox1.ForeColor = Color.Black;
+            textBox1.BackColor = Color.Gray;
+            this.BackColor = Color.Gray;
+        }
+
+        private void defaultToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            textBox1.ForeColor = Color.Black;
+            textBox1.BackColor = Color.White;
+            this.BackColor = Color.White;
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e) => Application.Exit();
+        #endregion
+
+        #region 自动保存与登录检查线程任务
         /*
          * 启动线程，每隔十秒检测一次登录是否过期
          */
-        private async void LoginCheckThreadTask()
+        private void LoginCheckThreadTask()
         {
             while (autoLogin)
             {
@@ -216,7 +406,9 @@ namespace Notepad
                 isLogin = true;
             }
         }
+        #endregion
 
+        #region 博客操作点击事件   
         private async void loginToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AuthService authService = new AuthService();
@@ -243,6 +435,8 @@ namespace Notepad
                 isLogin = true;
             }
         }
+
+       
 
         private void getBlogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -274,19 +468,6 @@ namespace Notepad
             }
         }
 
-        private void setTextBox()
-        {
-            currentPost = PostChoseHelper.POSTID;
-            this.path = PostChoseHelper.FILEPATH;
-            string originalContent = File.ReadAllText(path);
-            originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
-            textBox1.Text = originalContent;
-            this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE;
-            this.textBox1.SelectionStart = PostEditHelper.ReadPostEditPosById(PostChoseHelper.POSTID);
-            this.textBox1.Focus();
-            this.textBox1.ScrollToCaret();
-        }
-
         private void addNewPostToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!isLogin || token == null || token == " " || postServices == null)
@@ -313,7 +494,7 @@ namespace Notepad
                 FrmTips.ShowTipsError(this, "新建博客失败");
             }
             editPosts.Add(postId.ToString(), new KeyValuePair<string, string>(post.title, post.originalContent));
-            FrmTips.ShowTipsInfo(this, "新建博客: " + postId + ":" + post.title + 
+            FrmTips.ShowTipsInfo(this, "新建博客: " + postId + ":" + post.title +
                 "\n缓存路径为: " + cachePath);
             // 增加新的博客编辑位置
             PostEditHelper.WritePostEditPosById(0);
@@ -349,41 +530,6 @@ namespace Notepad
                 saveAsToolStripMenuItem_Click(sender, e);
             }
         }
-
-        public async Task SaveEditingPost()
-        {
-            if (!String.IsNullOrWhiteSpace(path))
-            {
-                File.WriteAllText(path, textBox1.Text);
-                editPosts[PostChoseHelper.POSTID.ToString()] =
-                    new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
-                if (PostChoseHelper.POSTID >= 0)
-                {
-                    // 异步方法会卡死在await，虽然成功调用了方法，但无法正确返回response
-                    // 非异步方法中调用异步方法会导致无法正确返回（可能是因为程序本身已经跑过去了？）
-                    isSaved = await postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
-                    PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
-                    if (isSaved)
-                        this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
-                }
-            } 
-            else
-            {
-                FrmTips.ShowTipsError(this, "未选择博客");
-            }
-        }
-
-        private void exitPrompt()
-        {
-            if (!isSaved)
-            {
-                DialogResult = MessageBox.Show("Do you want to save current file?",
-                "Notepad",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button2);
-            }
-        }
         //相应的查找子菜单
         private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -391,71 +537,6 @@ namespace Notepad
             f2.StartPosition = FormStartPosition.CenterParent;
             f2.Show();
         }
-
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!String.IsNullOrWhiteSpace(textBox1.Text))
-            {
-                exitPrompt();
-
-                if (DialogResult == DialogResult.Yes)
-                {
-                    saveToolStripMenuItem_Click(sender, e);
-                    textBox1.Text = String.Empty;
-                    path = String.Empty;;
-                }
-                else if (DialogResult == DialogResult.No)
-                {
-                    textBox1.Text = String.Empty;;
-                    path = String.Empty;;
-                }
-
-            }
-        }
-
-        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.SelectAll();
-
-        private void cutToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.Cut();
-
-        private void copyToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.Copy();
-
-        private void pasteToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.Paste();
-
-        private void deleteToolStripMenuItem_Click(object sender, EventArgs e) => textBox1.SelectedText = String.Empty;
-
-        private void wordWrapToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (wordWrapToolStripMenuItem.Checked == true)
-            {
-                textBox1.WordWrap = false;
-                textBox1.ScrollBars = RichTextBoxScrollBars.Both;
-                wordWrapToolStripMenuItem.Checked = false;
-            }
-            else
-            {
-                textBox1.WordWrap = true;
-                textBox1.ScrollBars = RichTextBoxScrollBars.Vertical;
-                wordWrapToolStripMenuItem.Checked = true;
-            }
-        }
-
-        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (fontDialog1.ShowDialog() == DialogResult.OK)
-            {
-                textBox1.Font = textBox1.Font = new Font(fontDialog1.Font, fontDialog1.Font.Style);
-
-                textBox1.ForeColor = fontDialog1.Color;
-            }
-        }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Form aboutForm = new Form2();
-            aboutForm.ShowDialog();
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e) => Application.Exit();
         // 选择博客的下拉框事件
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -477,202 +558,6 @@ namespace Notepad
 
             text = textBox1.Text;
         }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(textBox1.Text))
-            {
-                exitPrompt();
-
-                if (DialogResult == DialogResult.Yes)
-                {
-                    saveToolStripMenuItem_Click(sender, e);
-                }
-                else if (DialogResult == DialogResult.Cancel)
-                {
-                    e.Cancel = true;
-                }
-            }
-        }
-
-        private async void textBox1_KeyDown(object sender, KeyEventArgs e)
-        {
-
-            if (e.Control)
-            {
-
-                switch (e.KeyCode)
-                {
-                    case Keys.A:
-                        e.SuppressKeyPress = true;
-                        textBox1.SelectAll();
-                        break;
-                    case Keys.N:
-                        e.SuppressKeyPress = true;
-                        newToolStripMenuItem_Click(sender, e);
-                        break;
-                    case Keys.S:
-                        e.SuppressKeyPress = true;
-                        await SaveEditingPost();
-                        break;
-                    case Keys.Q:
-                        if (this.TopMost == true)
-                        {
-                            this.TopMost = false;
-                        } 
-                        else
-                        {
-                            this.TopMost = true;
-                        }
-                        break;
-                    case Keys.F:
-                        e.SuppressKeyPress= true;
-                        SearchToolStripMenuItem_Click(sender, e);
-                        break;
-                    case Keys.I:
-                        e.SuppressKeyPress = true;
-                        string path = InsertImageFromClipboard();
-                        this.textBox1.SelectedText = path;
-                        break;
-                }
-            }
-            
-        }
-        /// <summary>
-        /// 从剪切板获取图片插入到文本中
-        /// </summary>
-        /// <returns>返回MD格式引用</returns>
-        private string InsertImageFromClipboard()
-        {
-            if (Clipboard.ContainsImage())
-            {
-                attachmentService = new AttachmentService(token);
-                string path = AttachmentUtil.InsertImgFromClipBoard(attachmentService);
-                return path;
-            }
-            else
-            {
-                FrmTips.ShowTipsError(this, "剪切板没有图片");
-                return "";
-            }
-            
-        }
-
-        private void blackToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox1.ForeColor = Color.White;
-            textBox1.BackColor = Color.Black;
-            this.BackColor = Color.Gray;
-        }
-
-        private void grayToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox1.ForeColor = Color.Black;
-            textBox1.BackColor = Color.Gray;
-            this.BackColor = Color.Gray;
-        }
-
-        private void defaultToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            textBox1.ForeColor = Color.Black;
-            textBox1.BackColor = Color.White;
-            this.BackColor = Color.White;
-        }
-
-        private void Form1_SizeChanged(object sender, EventArgs e)
-        {
-            ChangePannelSize();
-        }
-
-        // 热键对应功能代码
-        protected override void WndProc(ref Message m)
-        {
-            const int WM_HOTKEY = 0x0312;
-            //按快捷键    
-            switch (m.Msg)
-            {
-                case WM_HOTKEY:
-                    switch (m.WParam.ToInt32())
-                    {
-                        case 100:    //隐藏窗口
-                            HideForm();
-                            break;
-                        case 101:   //切换MD和文本
-                            if (preViewMD)
-                                preViewMD = false;
-                            else
-                                preViewMD = true;
-                            ChangePannel();
-                            break;
-                        case 102:    //按下的是Alt+D   
-                            //此处填写快捷键响应代码   
-                            this.Text = "按下的是Ctrl+Alt+D";
-                            break;
-                        case 103:
-                            this.Text = "F5";
-                            break;
-                    }
-                    break;
-            }
-            base.WndProc(ref m);
-        }
-
-        public void HideForm() //alt+q隐藏窗体，再按显示窗体。
-        {
-            if (this.Visible == true)
-                this.Visible = false;
-            else
-                this.Visible = true;
-        }
-
-        private void ChangePannelSize()
-        {
-            panel1.Width = this.Width - 20;
-            panel1.Height = this.Height - 90;
-            comboBox1.Left = this.Width - 180;
-            if (preViewMD)
-            {
-                // webBrowser1.DocumentText = mdContent;
-                webBrowser1.Left = 5;
-                webBrowser1.Width = panel1.Width - 10;
-                webBrowser1.Top = 0;
-                webBrowser1.Height = panel1.Height - 10;
-            }
-            else
-            {
-                textBox1.Left = 5;
-                textBox1.Width = panel1.Width - 10;
-                textBox1.Top = 0;
-                textBox1.Height = panel1.Height - 10;
-            }
-        }
-        // alt+V 切换文本和MarkDown预览模式
-        private void ChangePannel()
-        {
-            if (preViewMD)
-            {
-                textBox1.Hide();
-                webBrowser1.Show();
-                string originalContent = textBox1.Text;
-                mdContent = CommonMarkConverter.Convert(originalContent);
-                string url = ConstantUtil.URL + "/archives/" + PostChoseHelper.TITLE;
-                webBrowser1.DocumentText = mdContent;
-                int pos = GetScrollPos(textBox1.Handle, 1);
-            }
-            else
-            {
-                webBrowser1.Hide();
-                textBox1.Show();
-                textBox1.Focus();
-            }
-            ChangePannelSize(); 
-        }
-
-        [DllImport("user32.dll", EntryPoint = "GetScrollPos")]
-        public static extern int GetScrollPos(
-            IntPtr hwnd,
-            int nBar
-        );
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -722,37 +607,6 @@ namespace Notepad
             }
         }
 
-        /*
-         * 初始化编辑位置
-         */
-        public void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (postServices == null)
-            {
-                FrmTips.ShowTipsError(this, "未登录");
-                return;
-            }
-            bool success = PostEditHelper.InitAllPost(postServices);
-            if (!success)
-            {
-                FrmTips.ShowTipsError(this, "初始化编辑位置失败，请检查初始化步骤");
-                return;
-            }
-            PostEditHelper.ReadPostEditInfo();
-        }
-        /*
-         * 添加正在编辑的博客到List
-         */
-        private void BindEditPosts()
-        {
-            List<KeyValuePair<string, string>> lstCom = new List<KeyValuePair<string, string>>();
-            foreach (var post in editPosts)
-            {
-                lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
-            }
-            this.comboBox1.DataSource = lstCom;
-        }
-
         private async void CacheAllBlogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (isWritingCache)
@@ -774,5 +628,174 @@ namespace Notepad
             isWritingCache = false;
             FrmTips.ShowTipsInfo(this, "全部写入完成");
         }
+        /*
+         * 初始化编辑位置
+         */
+        public void initEditPostToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (postServices == null)
+            {
+                FrmTips.ShowTipsError(this, "未登录");
+                return;
+            }
+            bool success = PostEditHelper.InitAllPost(postServices);
+            if (!success)
+            {
+                FrmTips.ShowTipsError(this, "初始化编辑位置失败，请检查初始化步骤");
+                return;
+            }
+            PostEditHelper.ReadPostEditInfo();
+        }
+        #endregion
+
+        #region 博客操作相关方法
+        /// <summary>
+        /// 添加新的博客到编辑列表
+        /// </summary>
+        private void BindEditPosts()
+        {
+            List<KeyValuePair<string, string>> lstCom = new List<KeyValuePair<string, string>>();
+            foreach (var post in editPosts)
+            {
+                lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
+            }
+            this.comboBox1.DataSource = lstCom;
+        }
+        /// <summary>
+        /// 选择博客进行编辑后更改界面内容
+        /// </summary>
+        private void setTextBox()
+        {
+            currentPost = PostChoseHelper.POSTID;
+            this.path = PostChoseHelper.FILEPATH;
+            string originalContent = File.ReadAllText(path);
+            originalContent = Regex.Replace(originalContent, "(?<!\r)\n", "\r\n");
+            textBox1.Text = originalContent;
+            this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE;
+            this.textBox1.SelectionStart = PostEditHelper.ReadPostEditPosById(PostChoseHelper.POSTID);
+            this.textBox1.Focus();
+            this.textBox1.ScrollToCaret();
+        }
+        /// <summary>
+        /// 保存正在编辑的博客
+        /// </summary>
+        public async Task SaveEditingPost()
+        {
+            if (!String.IsNullOrWhiteSpace(path))
+            {
+                File.WriteAllText(path, textBox1.Text);
+                editPosts[PostChoseHelper.POSTID.ToString()] =
+                    new KeyValuePair<string, string>(PostChoseHelper.TITLE, this.textBox1.Text);
+                if (PostChoseHelper.POSTID >= 0)
+                {
+                    // 异步方法会卡死在await，虽然成功调用了方法，但无法正确返回response
+                    // 非异步方法中调用异步方法会导致无法正确返回（可能是因为程序本身已经跑过去了？）
+                    isSaved = await postServices.UpdatePostByIdAsync(PostChoseHelper.POSTID, PostChoseHelper.TITLE, textBox1.Text);
+                    PostEditHelper.WritePostEditPosById(this.textBox1.SelectionStart);
+                    if (isSaved)
+                        this.Text = "AutoBlog" + " " + PostChoseHelper.POSTID + "-" + PostChoseHelper.TITLE + " saved";
+                }
+            }
+            else
+            {
+                FrmTips.ShowTipsError(this, "未选择博客");
+            }
+        }
+        /// <summary>
+        /// 从剪切板获取图片插入到文本中
+        /// </summary>
+        /// <returns>返回MD格式引用</returns>
+        private string InsertImageFromClipboard()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                attachmentService = new AttachmentService(token);
+                string path = AttachmentUtil.InsertImgFromClipBoard(attachmentService);
+                return path;
+            }
+            else
+            {
+                FrmTips.ShowTipsError(this, "剪切板没有图片");
+                return "";
+            }
+
+        }
+        #endregion
+
+        #region 快捷键相关事件与方法
+        /// <summary>
+        /// 热键处理代码
+        /// </summary>
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_HOTKEY = 0x0312;
+            //按快捷键    
+            switch (m.Msg)
+            {
+                case WM_HOTKEY:
+                    switch (m.WParam.ToInt32())
+                    {
+                        case 100:    //隐藏窗口
+                            HideForm();
+                            break;
+                        case 101:   //切换MD和文本
+                            if (preViewMD)
+                                preViewMD = false;
+                            else
+                                preViewMD = true;
+                            ChangePannel();
+                            break;
+                        case 102:    //按下的是Alt+D   
+                            //此处填写快捷键响应代码   
+                            this.Text = "按下的是Ctrl+Alt+D";
+                            break;
+                        case 103:
+                            this.Text = "F5";
+                            break;
+                    }
+                    break;
+            }
+            base.WndProc(ref m);
+        }
+        private async void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+
+            if (e.Control)
+            {
+
+                switch (e.KeyCode)
+                {
+                    case Keys.A:
+                        e.SuppressKeyPress = true;
+                        textBox1.SelectAll();
+                        break;
+                    case Keys.S:
+                        e.SuppressKeyPress = true;
+                        await SaveEditingPost();
+                        break;
+                    case Keys.Q:
+                        if (this.TopMost == true)
+                        {
+                            this.TopMost = false;
+                        }
+                        else
+                        {
+                            this.TopMost = true;
+                        }
+                        break;
+                    case Keys.F:
+                        e.SuppressKeyPress = true;
+                        SearchToolStripMenuItem_Click(sender, e);
+                        break;
+                    case Keys.I:
+                        e.SuppressKeyPress = true;
+                        string path = InsertImageFromClipboard();
+                        this.textBox1.SelectedText = path;
+                        break;
+                }
+            }
+
+        }
+        #endregion
     }
 }

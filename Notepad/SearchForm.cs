@@ -9,8 +9,8 @@ namespace NotePad
     public partial class SearchForm : Form
     {
         //实现对form1的关联
-        Form1 mainfrom1;
-        public SearchForm(Form1 form1)
+        MainForm mainfrom1;
+        public SearchForm(MainForm form1)
         {
             InitializeComponent();
             mainfrom1 = form1;
