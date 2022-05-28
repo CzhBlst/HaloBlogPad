@@ -1,13 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Notepad.Bean;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Forms;
 
 namespace Notepad.Utils
 {
@@ -32,7 +27,7 @@ namespace Notepad.Utils
             JObject jo = (JObject)JsonConvert.DeserializeObject(settingsText);
             if (jo.Count < 3)
             {
-                MessageBox.Show("请修改配置文件");
+                // MessageBox.Show("请修改配置文件");
                 return new Setting();
             }
             Setting settings = new Setting();
@@ -43,7 +38,7 @@ namespace Notepad.Utils
                 settings.Username == "" ||
                 settings.Password == "")
             {
-                MessageBox.Show("请修改配置文件");
+                // MessageBox.Show("请修改配置文件");
             }
             return settings;
         }

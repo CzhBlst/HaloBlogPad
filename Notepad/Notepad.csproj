@@ -58,7 +58,7 @@
       <HintPath>..\packages\CommonMark.NET.0.15.1\lib\net45\CommonMark.dll</HintPath>
     </Reference>
     <Reference Include="HZH_Controls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\HZH_Controls.1.0.14\lib\net40\HZH_Controls.dll</HintPath>
+      <HintPath>..\packages\HZH_Controls.1.0.8\lib\net40\HZH_Controls.dll</HintPath>
     </Reference>
     <Reference Include="Markdown, Version=2.0.0.0, Culture=neutral, PublicKeyToken=1b320cc08ad5aa89, processorArchitecture=MSIL">
       <HintPath>..\packages\Markdown.2.2.1\lib\net451\Markdown.dll</HintPath>
@@ -164,28 +164,28 @@
     <Compile Include="Bean\Setting.cs" />
     <Compile Include="Bean\LoginInfo.cs" />
     <Compile Include="Bean\User.cs" />
-    <Compile Include="MainForm.cs">
+    <Compile Include="View\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="View\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="AboutForm.cs">
+    <Compile Include="View\AboutForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutForm.Designer.cs">
+    <Compile Include="View\AboutForm.Designer.cs">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SearchForm.cs">
+    <Compile Include="View\SearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SearchForm.designer.cs">
+    <Compile Include="View\SearchForm.designer.cs">
       <DependentUpon>SearchForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="BlogChoseForm.cs">
+    <Compile Include="View\BlogChoseForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BlogChoseForm.designer.cs">
+    <Compile Include="View\BlogChoseForm.designer.cs">
       <DependentUpon>BlogChoseForm.cs</DependentUpon>
     </Compile>
     <Compile Include="HotKey.cs" />
@@ -195,10 +195,10 @@
     <Compile Include="Services\AuthService.cs" />
     <Compile Include="Services\PostService.cs" />
     <Compile Include="Services\StaticStorageService.cs" />
-    <Compile Include="SettingForm.cs">
+    <Compile Include="View\SettingForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingForm.Designer.cs">
+    <Compile Include="View\SettingForm.Designer.cs">
       <DependentUpon>SettingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\AddBlogToEdits.cs" />
@@ -210,16 +210,16 @@
     <Compile Include="Utils\PostEditHelper.cs" />
     <Compile Include="Utils\PostUtil.cs" />
     <Compile Include="Utils\BlogSettingHelper.cs" />
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="View\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="AboutForm.resx">
+    <EmbeddedResource Include="View\AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SearchForm.resx">
+    <EmbeddedResource Include="View\SearchForm.resx">
       <DependentUpon>SearchForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="BlogChoseForm.resx">
+    <EmbeddedResource Include="View\BlogChoseForm.resx">
       <DependentUpon>BlogChoseForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -232,7 +232,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="SettingForm.resx">
+    <EmbeddedResource Include="View\SettingForm.resx">
       <DependentUpon>SettingForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="EditPosition.json">

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace Notepad.Utils
 {
@@ -34,7 +35,6 @@ namespace Notepad.Utils
             JObject jo = (JObject)JsonConvert.DeserializeObject(settingsText);
             if (jo.Count < 6)
             {
-                MessageBox.Show("Setting设置异常");
                 return new CommonSetting();
             }
             CommonSetting settings = new CommonSetting();
@@ -48,7 +48,7 @@ namespace Notepad.Utils
                 settings.AttachmentCache == ""
                 )
             {
-                MessageBox.Show("Setting设置异常");
+
             }
             return settings;
         }
