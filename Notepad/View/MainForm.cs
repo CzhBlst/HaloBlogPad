@@ -168,6 +168,7 @@ namespace Notepad
             panel1.Width = this.Width - 20;
             panel1.Height = this.Height - 90;
             comboBox1.Left = this.Width - 180;
+            publishBox.Left = comboBox1.Left - 60;
             if (preViewMD)
             {
                 // webBrowser1.DocumentText = mdContent;
@@ -406,6 +407,18 @@ namespace Notepad
                 isLogin = true;
             }
         }
+
+        private void publishBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (publishBox.Checked)
+            {
+                PostUtil.DefaultStatus = "PUBLISHED";
+            }
+            else
+            {
+                PostUtil.DefaultStatus = "DRAFT";
+            }
+        }
         #endregion
 
         #region 博客操作点击事件   
@@ -435,8 +448,6 @@ namespace Notepad
                 isLogin = true;
             }
         }
-
-       
 
         private void getBlogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -797,5 +808,7 @@ namespace Notepad
 
         }
         #endregion
+
+        
     }
 }

@@ -73,6 +73,7 @@ namespace Notepad
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.textBox1 = new System.Windows.Forms.RichTextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.publishBox = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -416,26 +417,38 @@ namespace Notepad
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(516, 25);
+            this.comboBox1.Location = new System.Drawing.Point(428, 30);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(144, 20);
             this.comboBox1.TabIndex = 7;
             this.comboBox1.TabStop = false;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // Form1
+            // publishBox
+            // 
+            this.publishBox.AutoSize = true;
+            this.publishBox.Location = new System.Drawing.Point(374, 32);
+            this.publishBox.Name = "publishBox";
+            this.publishBox.Size = new System.Drawing.Size(48, 16);
+            this.publishBox.TabIndex = 8;
+            this.publishBox.Text = "发布";
+            this.publishBox.UseVisualStyleBackColor = true;
+            this.publishBox.CheckedChanged += new System.EventHandler(this.publishBox_CheckedChanged);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(1129, 611);
+            this.Controls.Add(this.publishBox);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip2);
             this.Controls.Add(this.labelFormat);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "Notepad";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
@@ -495,6 +508,7 @@ namespace Notepad
         private System.Windows.Forms.ToolStripMenuItem 拉取所有博客到本地ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 添加博客ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.CheckBox publishBox;
     }
 }
 

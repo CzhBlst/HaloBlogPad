@@ -19,5 +19,6 @@ namespace Notepad.Utils
         public static bool AUTOLOGIN = false;
         public static int LOGINCHECKINTERVAL = 10 * 1000;
         public static int SAVEINTERVAL = 60 * 1000;
+        
     }
 }

@@ -219,7 +219,6 @@ namespace Notepad.Services
             string uri = @"/api/admin/posts/" + id;
             var request = new RestRequest(uri, Method.PUT);
             client.AddDefaultHeader("ADMIN-Authorization", token);
-            // 将更新的Post状态默认修改为Published
             Post post = new Post(title, originalContent);
             post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
@@ -237,7 +236,6 @@ namespace Notepad.Services
             string uri = @"/api/admin/posts/" + id;
             var request = new RestRequest(uri, Method.PUT);
             client.AddDefaultHeader("ADMIN-Authorization", token);
-            // 将更新的Post状态默认修改为Published
             Post post = new Post(title, originalContent);
             post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
