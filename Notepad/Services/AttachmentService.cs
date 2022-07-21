@@ -17,7 +17,7 @@ namespace Notepad.Services
     class AttachmentService
     {
         private string token;
-
+        
         public AttachmentService(string token)
         {
             this.token = token;
@@ -29,7 +29,7 @@ namespace Notepad.Services
         /// <returns>文件引用路径</returns>
         public string UploadAttachment(string filename)
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = new RestClient();
             client.AddDefaultHeader("ADMIN-Authorization", token);
             string uri = @"/api/admin/attachments/upload";
             var request = new RestRequest(uri, Method.POST);

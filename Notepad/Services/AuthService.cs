@@ -16,12 +16,13 @@ namespace Notepad.Services
          */
         public LoginInfo Login()
         {
+            RestClient client = new RestClient(ConstantUtil.URL);
             LoginInfo token = new LoginInfo();
             string uri = @"/api/admin/login";
             User user = new User(ConstantUtil.USERNAME, ConstantUtil.PASSWORD);
             var contentData = JsonConvert.SerializeObject(user);
 
-            var client = new RestClient(ConstantUtil.URL);
+            // var client = new RestClient(ConstantUtil.URL);
             var request = new RestRequest(uri, Method.POST);
             request.AddJsonBody(contentData);
 
@@ -51,15 +52,13 @@ namespace Notepad.Services
 
         public async Task<LoginInfo> LoginAsync()
         {
+            RestClient client = new RestClient(ConstantUtil.URL);
             LoginInfo token = new LoginInfo();
             string uri = @"/api/admin/login";
             User user = new User(ConstantUtil.USERNAME, ConstantUtil.PASSWORD);
             var contentData = JsonConvert.SerializeObject(user);
-
-            var client = new RestClient(ConstantUtil.URL);
-            var request = new RestRequest(uri, Method.POST);
+            var request = new RestRequest(uri, Method.POST);  
             request.AddJsonBody(contentData);
-
             // IRestResponse restResponse = client.Execute(request);
             IRestResponse restResponse = await client.ExecuteAsync(request);
 

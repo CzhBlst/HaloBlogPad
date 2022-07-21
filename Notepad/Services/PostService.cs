@@ -17,7 +17,6 @@ namespace Notepad.Services
     {
         private string token;
         private int pages;
-
         public PostService(string token)
         {
             this.token = token;
@@ -28,10 +27,10 @@ namespace Notepad.Services
          */
         public int GetPages()
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = @"/api/admin/posts";
             var request = new RestRequest(uri, Method.GET);
-            request.AddParameter("admin_token", token);
+            // request.AddParameter("admin_token", token);
             request.AddParameter("more", true);
             request.AddParameter("page", 0);
             IRestResponse restResponse = client.Execute(request);
@@ -51,11 +50,10 @@ namespace Notepad.Services
          */
         public List<PostInfo> GetPostByPage(int page)
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             List<PostInfo> postsList = new List<PostInfo>();
             string uri = @"/api/admin/posts";
             var request = new RestRequest(uri, Method.GET);
-            request.AddParameter("admin_token", token);
             request.AddParameter("more", true);
             request.AddParameter("page", page - 1);
 
@@ -107,10 +105,10 @@ namespace Notepad.Services
         public Post GetPostById(int postId)
         {
             Post post = null;
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = "/api/admin/posts/" + postId;
             var request = new RestRequest(uri, Method.GET);
-            request.AddParameter("admin_token", token);
+            // request.AddParameter("admin_token", token);
             IRestResponse restResponse = client.Execute(request);
 
             // string statusCode = restResponse.StatusCode.ToString();
@@ -130,10 +128,10 @@ namespace Notepad.Services
         public async Task<Post> SavePostToLocalByIdAsync(int postId)
         {
             Post post = null;
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = "/api/admin/posts/" + postId;
             var request = new RestRequest(uri, Method.GET);
-            request.AddParameter("admin_token", token);
+            // request.AddParameter("admin_token", token);
             IRestResponse restResponse = await client.ExecuteAsync(request);
             // string statusCode = restResponse.StatusCode.ToString();
             if (restResponse.IsSuccessful)
@@ -156,7 +154,7 @@ namespace Notepad.Services
          */
         public int AddNewPost(string title)
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string cachePath = ConstantUtil.BLOGCACHE + title;
             StreamReader sr = new StreamReader(cachePath);
             string originalContent = sr.ReadToEnd();
@@ -165,9 +163,9 @@ namespace Notepad.Services
             var jsonPost = JsonConvert.SerializeObject(newPost);
             string uri = @"/api/admin/posts";
             var request = new RestRequest(uri, Method.POST);
-            client.AddDefaultHeader("ADMIN-Authorization", token);
+            // request.AddParameter("admin_token", token);
             request.AddJsonBody(jsonPost);
-
+            
             IRestResponse restResponse = client.Execute(request);
 
             string statusCode = restResponse.StatusCode.ToString();
@@ -186,10 +184,10 @@ namespace Notepad.Services
          */
         public string UpdatePostById(int id, string path)
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = @"/api/admin/posts/" + id;
             var request = new RestRequest(uri, Method.PUT);
-            client.AddDefaultHeader("ADMIN-Authorization", token);
+            // request.AddParameter("admin_token", token);
             Post post = GetPostById(id);
             post.status = PostUtil.DefaultStatus;
             string title = post.title;
@@ -215,10 +213,11 @@ namespace Notepad.Services
          */
         public bool UpdatePostById(int id, string title, string originalContent)
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = @"/api/admin/posts/" + id;
             var request = new RestRequest(uri, Method.PUT);
-            client.AddDefaultHeader("ADMIN-Authorization", token);
+            // client.AddOrUpdateHeader("ADMIN-Authorization", token);
+            // request.AddParameter("admin_token", token);
             Post post = new Post(title, originalContent);
             post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
@@ -232,13 +231,13 @@ namespace Notepad.Services
 
         public async Task<bool> UpdatePostByIdAsync(int id, string title, string originalContent)
         {
-            RestClient client = new RestClient(ConstantUtil.URL);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = @"/api/admin/posts/" + id;
             var request = new RestRequest(uri, Method.PUT);
-            client.AddDefaultHeader("ADMIN-Authorization", token);
             Post post = new Post(title, originalContent);
             post.status = PostUtil.DefaultStatus;
             var jsonPost = JsonConvert.SerializeObject(post);
+            // request.AddParameter("admin_token", token);
             request.AddJsonBody(jsonPost);
             var response = await client.ExecuteAsync(request);
             return response.IsSuccessful;
