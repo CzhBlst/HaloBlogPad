@@ -16,8 +16,7 @@ namespace NotePad
             this.Text = "博客选择";
             InitializeComponent();
             PostService postServices = new PostService(token);
-            var posts = postServices.GetAllPost();
-            
+            List<PostInfo> posts = postServices.GetAllPost();
             List<DataGridViewColumnEntity> lstColumns = new List<DataGridViewColumnEntity>();
             lstColumns.Add(new DataGridViewColumnEntity() { DataField = "Id", HeadText = "编号", Width = 70, WidthType = SizeType.Absolute });
             lstColumns.Add(new DataGridViewColumnEntity() { DataField = "Title", HeadText = "博客", Width = 80, WidthType = SizeType.Percent });

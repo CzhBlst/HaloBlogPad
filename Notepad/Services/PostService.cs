@@ -17,6 +17,7 @@ namespace Notepad.Services
     {
         private string token;
         private int pages;
+        private bool saving;
         public PostService(string token)
         {
             this.token = token;
@@ -34,6 +35,26 @@ namespace Notepad.Services
             request.AddParameter("more", true);
             request.AddParameter("page", 0);
             IRestResponse restResponse = client.Execute(request);
+
+            string statusCode = restResponse.StatusCode.ToString();
+            if (restResponse.IsSuccessful)
+            {
+                var json = restResponse.Content;
+                JObject jo = (JObject)JsonConvert.DeserializeObject(json);
+                pages = int.Parse(jo["data"]["pages"].ToString());
+            }
+            return pages;
+        }
+
+        public async Task<int> GetPagesAsync()
+        {
+            RestClient client = RestClientFactory.GetRestClient(token);
+            string uri = @"/api/admin/posts";
+            var request = new RestRequest(uri, Method.GET);
+            // request.AddParameter("admin_token", token);
+            request.AddParameter("more", true);
+            request.AddParameter("page", 0);
+            IRestResponse restResponse = await client.ExecuteAsync(request);
 
             string statusCode = restResponse.StatusCode.ToString();
             if (restResponse.IsSuccessful)
@@ -85,6 +106,43 @@ namespace Notepad.Services
             return postsList;
         }
 
+        public async Task<List<PostInfo>> GetPostByPageAsync(int page)
+        {
+            RestClient client = RestClientFactory.GetRestClient(token);
+            List<PostInfo> postsList = new List<PostInfo>();
+            string uri = @"/api/admin/posts";
+            var request = new RestRequest(uri, Method.GET);
+            request.AddParameter("more", true);
+            request.AddParameter("page", page - 1);
+
+            IRestResponse restResponse = await client.ExecuteAsync(request);
+
+            string statusCode = restResponse.StatusCode.ToString();
+            if (restResponse.IsSuccessful)
+            {
+                var json = restResponse.Content;
+                JObject jo = (JObject)JsonConvert.DeserializeObject(json);
+                var contents = jo["data"]["content"];
+                foreach (var content in contents)
+                {
+                    if (content["status"].ToString().Equals("DRAFT") || content["status"].ToString().Equals("PUBLISHED"))
+                    {
+                        postsList.Add(new PostInfo(int.Parse(content["id"].ToString()),
+                            content["title"].ToString(),
+                            content["status"].ToString(),
+                            long.Parse(content["editTime"].ToString()),
+                            long.Parse(content["updateTime"].ToString())
+                        ));
+                    }
+                }
+            }
+            else
+            {
+                return null;
+            }
+            return postsList;
+        }
+
         /*
          * 获取全部博客
          */
@@ -95,6 +153,17 @@ namespace Notepad.Services
             for (int i = 1; i <= allPage; i++)
             {
                 allPost.AddRange(GetPostByPage(i));
+            }
+            return allPost;
+        }
+
+        public async Task<List<PostInfo>> GetAllPostAsync()
+        {
+            List<PostInfo> allPost = new List<PostInfo>();
+            int allPage = await GetPagesAsync();
+            for (int i = 1; i <= allPage; i++)
+            {
+                allPost.AddRange(await GetPostByPageAsync(i));
             }
             return allPost;
         }
@@ -231,6 +300,7 @@ namespace Notepad.Services
 
         public async Task<bool> UpdatePostByIdAsync(int id, string title, string originalContent)
         {
+            if (saving) return false;
             RestClient client = RestClientFactory.GetRestClient(token);
             string uri = @"/api/admin/posts/" + id;
             var request = new RestRequest(uri, Method.PUT);
@@ -239,7 +309,9 @@ namespace Notepad.Services
             var jsonPost = JsonConvert.SerializeObject(post);
             // request.AddParameter("admin_token", token);
             request.AddJsonBody(jsonPost);
+            saving = true;
             var response = await client.ExecuteAsync(request);
+            saving = false;
             return response.IsSuccessful;
         }
 

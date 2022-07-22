@@ -13,10 +13,11 @@ namespace Notepad.Utils
     static class RestClientFactory
     {
         static RestClient client;
+        static string lastToken;
 
         static public RestClient GetRestClient(string token)
         {
-            if (client == null)
+            if (client == null || token != lastToken)
             {
                 client = new RestClient(ConstantUtil.URL);
                 client.AddDefaultHeader("ADMIN-Authorization", token);

@@ -90,6 +90,7 @@ namespace Notepad.Services
                 sr.Flush();
                 sr.Close();
             }
+
         }
 
         /*
