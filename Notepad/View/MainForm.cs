@@ -404,6 +404,8 @@ namespace Notepad
             } 
             else
             {
+                token = lastToken.UsingToken;
+                postServices = new PostService(token);
                 isLogin = true;
             }
         }

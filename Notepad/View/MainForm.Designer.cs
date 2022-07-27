@@ -431,6 +431,7 @@ namespace Notepad
             this.publishBox.Name = "publishBox";
             this.publishBox.Size = new System.Drawing.Size(48, 16);
             this.publishBox.TabIndex = 8;
+            this.publishBox.TabStop = false;
             this.publishBox.Text = "发布";
             this.publishBox.UseVisualStyleBackColor = true;
             this.publishBox.CheckedChanged += new System.EventHandler(this.publishBox_CheckedChanged);

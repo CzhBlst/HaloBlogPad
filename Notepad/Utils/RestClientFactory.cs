@@ -24,5 +24,11 @@ namespace Notepad.Utils
             }
             return client;
         }
+
+        static public void close()
+        {
+            client = null;
+            GC.Collect();
+        }
     }
 }
