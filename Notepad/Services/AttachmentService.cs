@@ -29,8 +29,7 @@ namespace Notepad.Services
         /// <returns>文件引用路径</returns>
         public string UploadAttachment(string filename)
         {
-            RestClient client = new RestClient();
-            client.AddDefaultHeader("ADMIN-Authorization", token);
+            RestClient client = RestClientFactory.GetRestClient(token);
             string uri = @"/api/admin/attachments/upload";
             var request = new RestRequest(uri, Method.POST);
             if (File.Exists(filename))

@@ -460,6 +460,7 @@ namespace Notepad
             }
             Form postsForm = new BlogChoseForm(token);
             postsForm.StartPosition = FormStartPosition.CenterScreen;
+            postsForm.TopMost = true;
             postsForm.ShowDialog();
             if (!AddBlogToEdits.TITLE.Equals(""))
             {
@@ -547,7 +548,7 @@ namespace Notepad
         private void SearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SearchForm f2 = new SearchForm(this);
-            f2.StartPosition = FormStartPosition.CenterParent;
+            f2.StartPosition = FormStartPosition.CenterScreen;
             f2.Show();
         }
         // 选择博客的下拉框事件
