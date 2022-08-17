@@ -32,6 +32,7 @@ namespace NotePad
             this.button1 = new System.Windows.Forms.Button();
             this.ucDataGridView1 = new HZH_Controls.Controls.UCDataGridView();
             this.ucBtnExt1 = new HZH_Controls.Controls.UCBtnExt();
+            this.TipTextLabel = new Sunny.UI.UISmoothLabel();
             this.SuspendLayout();
             // 
             // button1
@@ -76,7 +77,7 @@ namespace NotePad
             this.ucBtnExt1.IsRadius = true;
             this.ucBtnExt1.IsShowRect = false;
             this.ucBtnExt1.IsShowTips = false;
-            this.ucBtnExt1.Location = new System.Drawing.Point(293, 354);
+            this.ucBtnExt1.Location = new System.Drawing.Point(273, 354);
             this.ucBtnExt1.Margin = new System.Windows.Forms.Padding(0);
             this.ucBtnExt1.Name = "ucBtnExt1";
             this.ucBtnExt1.RectColor = System.Drawing.Color.Azure;
@@ -88,11 +89,26 @@ namespace NotePad
             this.ucBtnExt1.TipsText = "";
             this.ucBtnExt1.BtnClick += new System.EventHandler(this.ucBtnExt1_BtnClick);
             // 
+            // TipTextLabel
+            // 
+            this.TipTextLabel.BackColor = System.Drawing.SystemColors.HighlightText;
+            this.TipTextLabel.Font = new System.Drawing.Font("微软雅黑", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.TipTextLabel.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.TipTextLabel.Location = new System.Drawing.Point(200, 161);
+            this.TipTextLabel.Name = "TipTextLabel";
+            this.TipTextLabel.RectColor = System.Drawing.Color.Black;
+            this.TipTextLabel.Size = new System.Drawing.Size(291, 59);
+            this.TipTextLabel.Style = Sunny.UI.UIStyle.Custom;
+            this.TipTextLabel.TabIndex = 5;
+            this.TipTextLabel.Text = "正在获取博客 · · · ";
+            this.TipTextLabel.ZoomScaleRect = new System.Drawing.Rectangle(0, 0, 0, 0);
+            // 
             // BlogChoseForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(684, 382);
+            this.Controls.Add(this.TipTextLabel);
             this.Controls.Add(this.ucBtnExt1);
             this.Controls.Add(this.ucDataGridView1);
             this.Controls.Add(this.button1);
@@ -106,6 +122,7 @@ namespace NotePad
         private System.Windows.Forms.Button button1;
         private HZH_Controls.Controls.UCDataGridView ucDataGridView1;
         private HZH_Controls.Controls.UCBtnExt ucBtnExt1;
+        private Sunny.UI.UISmoothLabel TipTextLabel;
     }
 }
 

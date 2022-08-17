@@ -12,7 +12,7 @@ namespace Notepad.Utils
     /// </summary>
     static class RestClientFactory
     {
-        static RestClient client;
+        static private volatile RestClient client;
         static string lastToken;
 
         static public RestClient GetRestClient(string token)
@@ -21,6 +21,7 @@ namespace Notepad.Utils
             {
                 client = new RestClient(ConstantUtil.URL);
                 client.AddDefaultHeader("ADMIN-Authorization", token);
+                lastToken = token;
             }
             return client;
         }

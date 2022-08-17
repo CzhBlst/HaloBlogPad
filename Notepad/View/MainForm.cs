@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Windows.Forms;
 
 namespace Notepad
@@ -36,6 +37,7 @@ namespace Notepad
         PostService postServices;
         AttachmentService attachmentService;
         Dictionary<String, KeyValuePair<String, String>> editPosts; // id, title, content
+        List<KeyValuePair<string, string>> editPostsCom;
         Thread loginCheckTrd;
         Thread autoSaveTrd;
         [DllImport("user32.dll", EntryPoint = "GetScrollPos")]
@@ -70,6 +72,7 @@ namespace Notepad
             saveInterval = ConstantUtil.SAVEINTERVAL;
 
             editPosts = new Dictionary<string, KeyValuePair<string, string>>();
+            editPostsCom = new List<KeyValuePair<string, string>>();
             // textBox1.Font.Size = 12;
             // 修改默认字体大小
             textBox1.Font = new Font(textBox1.Font.FontFamily, 12, textBox1.Font.Style);
@@ -466,15 +469,8 @@ namespace Notepad
             {
                 Post post = postServices.GetPostById(AddBlogToEdits.POSTID); // 获取所选博客详细信息
                 PostUtil.WriteToCache(post); // 将博客内容读取到本地
-                try
-                {
-                    editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
-                    BindEditPosts();
-                }
-                catch (ArgumentException e1)
-                {
-                    Console.WriteLine(e1.StackTrace);
-                }
+                Boolean f = AddEdits(post);
+                if (!f) MessageBox.Show("选择异常");
             }
             else
             {
@@ -506,13 +502,14 @@ namespace Notepad
             if (postId == -1)
             {
                 FrmTips.ShowTipsError(this, "新建博客失败");
+                return;
             }
-            editPosts.Add(postId.ToString(), new KeyValuePair<string, string>(post.title, post.originalContent));
             FrmTips.ShowTipsInfo(this, "新建博客: " + postId + ":" + post.title +
                 "\n缓存路径为: " + cachePath);
             // 增加新的博客编辑位置
             PostEditHelper.WritePostEditPosById(0);
-            BindEditPosts();
+            post.id = "" + postId;
+            AddEdits(post);
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -554,6 +551,7 @@ namespace Notepad
         // 选择博客的下拉框事件
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (comboBox1.DataSource == null) return;
             if (editPosts.Count > 1 && PostChoseHelper.POSTID > 0)
             {
                 saveToolStripMenuItem_Click(sender, e);
@@ -668,12 +666,8 @@ namespace Notepad
         /// </summary>
         private void BindEditPosts()
         {
-            List<KeyValuePair<string, string>> lstCom = new List<KeyValuePair<string, string>>();
-            foreach (var post in editPosts)
-            {
-                lstCom.Add(new KeyValuePair<string, string>(post.Key, post.Value.Key));
-            }
-            this.comboBox1.DataSource = lstCom;
+            this.comboBox1.DataSource = null;
+            this.comboBox1.DataSource = editPostsCom;
         }
         /// <summary>
         /// 选择博客进行编辑后更改界面内容
@@ -693,7 +687,7 @@ namespace Notepad
         /// <summary>
         /// 保存正在编辑的博客
         /// </summary>
-        public async Task SaveEditingPost()
+        private async Task SaveEditingPost()
         {
             if (!String.IsNullOrWhiteSpace(path))
             {
@@ -733,6 +727,22 @@ namespace Notepad
                 return "";
             }
 
+        }
+
+        private Boolean AddEdits(Post post)
+        {
+            try
+            {
+                editPosts.Add(post.id, new KeyValuePair<string, string>(post.title, post.originalContent));
+                editPostsCom.Add(new KeyValuePair<string, string>(post.id, post.title));
+                BindEditPosts();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+            return true;
         }
         #endregion
 
