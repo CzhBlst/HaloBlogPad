@@ -668,6 +668,7 @@ namespace Notepad
         {
             this.comboBox1.DataSource = null;
             this.comboBox1.DataSource = editPostsCom;
+            this.comboBox1.SelectedIndex = editPosts.Count - 1;
         }
         /// <summary>
         /// 选择博客进行编辑后更改界面内容
